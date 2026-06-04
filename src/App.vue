@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import { useLargeScreen } from './composables/useLargeScreen'
+
 const route = useRoute()
 const navOpen = ref(false)
+const { isLargeScreen } = useLargeScreen()
 
 const navLinkClass = 'rounded-md px-3 py-1.5 text-zinc-300 transition hover:bg-zinc-800 hover:text-zinc-100'
 const navLinkActiveClass = 'bg-zinc-800 text-zinc-100'
@@ -11,18 +14,10 @@ watch(() => route.path, () => {
   navOpen.value = false
 })
 
-function closeNavOnDesktop(): void {
-  if (window.matchMedia('(min-width: 1024px)').matches) {
+watch(isLargeScreen, (large) => {
+  if (large) {
     navOpen.value = false
   }
-}
-
-onMounted(() => {
-  window.addEventListener('resize', closeNavOnDesktop)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', closeNavOnDesktop)
 })
 </script>
 

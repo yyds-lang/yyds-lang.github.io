@@ -1,8 +1,13 @@
 <template>
   <span
-    class="inline-flex items-center border rounded-md px-3 py-1 text-xs font-medium"
+    class="inline-flex items-center gap-1.5 border rounded-md px-3 py-1 text-xs font-medium"
     :class="colorClass"
   >
+    <span
+      v-if="status === 'loading'"
+      class="i-eos-icons-loading h-3.5 w-3.5 shrink-0 animate-spin"
+      aria-hidden="true"
+    />
     {{ text }}
   </span>
 </template>

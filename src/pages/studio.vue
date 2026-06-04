@@ -7,7 +7,15 @@
         <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
           <label class="flex flex-wrap items-center gap-2 text-xs text-zinc-300">
             曲目
+            <span
+              v-if="isExampleSelectLoading"
+              class="inline-flex items-center gap-1.5 border border-zinc-700 rounded-lg bg-zinc-800 px-2 py-1 text-xs text-zinc-400"
+            >
+              <span class="i-eos-icons-loading h-3.5 w-3.5 shrink-0 animate-spin" aria-hidden="true" />
+              加载中...
+            </span>
             <select
+              v-else
               :value="selectedExample"
               class="border border-zinc-700 rounded-lg bg-zinc-800 px-2 py-1 text-xs text-zinc-100 outline-none focus:border-emerald-400"
               @change="onExampleChange"
@@ -79,7 +87,7 @@
       <div
         class="border border-zinc-800 rounded-lg bg-zinc-950 p-3 text-sm text-zinc-300 space-y-1"
       >
-        <p>时长: {{ durationSeconds.toFixed(2) }}s</p>
+        <p>时长: {{ displayDurationSeconds.toFixed(2) }}s</p>
         <p>大小: {{ Math.round(wavSize / 1024) }} KB</p>
         <p>耗时: {{ renderMs }} ms</p>
       </div>
@@ -100,8 +108,10 @@
 
 <script setup lang="ts">
 import AudioPlayerCard from '../components/AudioPlayerCard.vue'
+import { useLargeScreen } from '../composables/useLargeScreen'
 import { createYydsEditor } from '../editor/monaco'
 import { useSharedAudio } from '../lib/sharedAudio'
+import { toPublicUrl } from '../lib/toPublicUrl'
 import { initWasm, renderWav } from '../lib/wasmClient'
 
 const instruments = ['piano', 'guitar', 'drums', 'dizi'] as const
@@ -115,21 +125,37 @@ interface ExampleItem {
 
 const editorEl = ref<HTMLElement | null>(null)
 const examples = ref<ExampleItem[]>([])
+const examplesLoading = ref(true)
+const exampleLoading = ref(false)
 const selectedExample = ref('')
 const selectedInstrument = ref<(typeof instruments)[number]>('piano')
 const songTitle = ref('YYDS Render')
 const status = ref<'idle' | 'loading' | 'success' | 'error'>('loading')
 const statusText = ref('正在初始化 WASM...')
 const errorText = ref('')
-const audioUrl = ref('')
 const playerDrawerOpen = ref(false)
 const renderMs = ref(0)
 const durationSeconds = ref(0)
 const wavSize = ref(0)
 const isRendering = computed(() => status.value === 'loading')
+const isExampleSelectLoading = computed(() => examplesLoading.value || exampleLoading.value)
 
 let editorHandle: Awaited<ReturnType<typeof createYydsEditor>> | null = null
 const sharedAudio = useSharedAudio()
+const { isLargeScreen } = useLargeScreen()
+
+const displayDurationSeconds = computed(() => {
+  if (sharedAudio.duration.value > 0) {
+    return sharedAudio.duration.value
+  }
+  return durationSeconds.value
+})
+
+watch(isLargeScreen, (large) => {
+  if (large) {
+    playerDrawerOpen.value = false
+  }
+})
 
 function isValidInstrument(value: string | null): value is Instrument {
   return value !== null && (instruments as readonly string[]).includes(value)
@@ -167,10 +193,8 @@ function persistSelection(): void {
   }
 }
 
-function toPublicUrl(path: string): string {
-  const base = import.meta.env.BASE_URL || '/'
-  const normalizedBase = base.endsWith('/') ? base : `${base}/`
-  return `${normalizedBase}${path.replace(/^\//, '')}`
+function clearAudio(): void {
+  sharedAudio.stop()
 }
 
 function toErrorMessage(error: unknown): string {
@@ -211,20 +235,6 @@ function stripTrackInstrumentHints(input: string): string {
   return input.replace(/\btrack\s*\[[^\]\r\n]+\]\s*/g, 'track ')
 }
 
-function closeDrawerOnDesktop(): void {
-  if (window.matchMedia('(min-width: 1024px)').matches) {
-    playerDrawerOpen.value = false
-  }
-}
-
-function clearAudio(): void {
-  sharedAudio.stop()
-  if (audioUrl.value) {
-    URL.revokeObjectURL(audioUrl.value)
-    audioUrl.value = ''
-  }
-}
-
 async function bootstrap(): Promise<void> {
   status.value = 'loading'
   statusText.value = '正在初始化 WASM...'
@@ -245,6 +255,7 @@ async function loadExamples(
   preferredExample = '',
   preferredInstrument: Instrument | null = null
 ): Promise<void> {
+  examplesLoading.value = true
   try {
     const response = await fetch(toPublicUrl('/examples/manifest.json'))
     if (!response.ok) {
@@ -266,12 +277,16 @@ async function loadExamples(
   catch (error) {
     errorText.value = toErrorMessage(error)
   }
+  finally {
+    examplesLoading.value = false
+  }
 }
 
 async function loadExample(file: string, preferredInstrument: Instrument | null = null): Promise<void> {
   if (!editorHandle || !file) {
     return
   }
+  exampleLoading.value = true
   status.value = 'loading'
   statusText.value = '加载并格式化曲目...'
   errorText.value = ''
@@ -301,6 +316,9 @@ async function loadExample(file: string, preferredInstrument: Instrument | null 
     status.value = 'error'
     statusText.value = '曲目加载失败'
     errorText.value = toErrorMessage(error)
+  }
+  finally {
+    exampleLoading.value = false
   }
 }
 
@@ -347,21 +365,20 @@ async function runRender(): Promise<void> {
     durationSeconds.value = result.durationSeconds
     wavSize.value = result.size
     const wavBlob = new Blob([result.bytes], { type: 'audio/wav' })
-    audioUrl.value = URL.createObjectURL(wavBlob)
-    await sharedAudio.load(audioUrl.value, { autoPlay: true, title: songTitle.value })
+    const { played } = await sharedAudio.load(wavBlob, { autoPlay: true, title: songTitle.value })
     status.value = 'success'
-    statusText.value = '渲染成功，正在播放'
+    statusText.value = played ? '渲染成功，正在播放' : '渲染成功，点击播放'
     playerDrawerOpen.value = true
   }
   catch (error) {
     status.value = 'error'
     statusText.value = '渲染失败'
     errorText.value = toErrorMessage(error)
+    clearAudio()
   }
 }
 
 onMounted(async () => {
-  window.addEventListener('resize', closeDrawerOnDesktop)
   const persisted = readPersistedSelection()
   if (persisted.instrument) {
     selectedInstrument.value = persisted.instrument
@@ -378,7 +395,6 @@ watch(selectedInstrument, () => {
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', closeDrawerOnDesktop)
   editorHandle?.dispose()
   clearAudio()
 })

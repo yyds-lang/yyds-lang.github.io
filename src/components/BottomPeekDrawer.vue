@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { isLargeScreenViewport } from '../composables/useLargeScreen'
+
 const props = withDefaults(
   defineProps<{
     modelValue?: boolean
@@ -37,7 +39,7 @@ watch(expanded, (isOpen) => {
   if (typeof document === 'undefined') {
     return
   }
-  const isDesktop = window.matchMedia('(min-width: 1024px)').matches
+  const isDesktop = isLargeScreenViewport()
   if (isDesktop) {
     document.body.style.overflow = ''
     return

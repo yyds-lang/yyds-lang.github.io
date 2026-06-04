@@ -81,6 +81,9 @@
           step="0.1"
           :value="progress"
           :disabled="!canPlay"
+          @pointerdown="beginScrub"
+          @pointerup="endScrub"
+          @pointercancel="endScrub"
           @input="onProgressInput"
         >
       </div>
@@ -130,6 +133,8 @@ const {
   progress,
   canPlay,
   togglePlay,
+  beginScrub,
+  endScrub,
   seekByProgress,
   download
 } = useSharedAudio()
