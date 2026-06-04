@@ -37,31 +37,43 @@ watch(isLargeScreen, (large) => {
           YYDS
         </RouterLink>
 
-        <button
-          type="button"
-          class="h-9 w-9 inline-flex items-center justify-center rounded-lg text-zinc-300 transition lg:hidden hover:bg-zinc-800 hover:text-zinc-100"
-          aria-label="打开菜单"
-          @click="navOpen = true"
-        >
-          <span class="i-lucide-menu h-5 w-5" aria-hidden="true" />
-        </button>
+        <div class="flex items-center gap-1">
+          <nav class="hidden items-center gap-1 text-sm lg:flex">
+            <RouterLink
+              to="/"
+              :class="navLinkClass"
+              :active-class="navLinkActiveClass"
+            >
+              首页
+            </RouterLink>
+            <RouterLink
+              to="/studio"
+              :class="navLinkClass"
+              :active-class="navLinkActiveClass"
+            >
+              Studio
+            </RouterLink>
+          </nav>
 
-        <nav class="hidden items-center gap-1 text-sm lg:flex">
-          <RouterLink
-            to="/"
-            :class="navLinkClass"
-            :active-class="navLinkActiveClass"
+          <a
+            href="https://github.com/yyds-lang"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="h-9 w-9 inline-flex items-center justify-center rounded-lg text-zinc-300 transition hover:bg-zinc-800 hover:text-zinc-100"
+            aria-label="GitHub"
           >
-            首页
-          </RouterLink>
-          <RouterLink
-            to="/studio"
-            :class="navLinkClass"
-            :active-class="navLinkActiveClass"
+            <span class="i-mdi-github h-5 w-5" aria-hidden="true" />
+          </a>
+
+          <button
+            type="button"
+            class="h-9 w-9 inline-flex items-center justify-center rounded-lg text-zinc-300 transition lg:hidden hover:bg-zinc-800 hover:text-zinc-100"
+            aria-label="打开菜单"
+            @click="navOpen = true"
           >
-            Studio
-          </RouterLink>
-        </nav>
+            <span class="i-lucide-menu h-5 w-5" aria-hidden="true" />
+          </button>
+        </div>
         </div>
       </header>
 
