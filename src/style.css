@@ -11,6 +11,16 @@ body,
   min-height: 100%;
 }
 
+@media (width < 1024px) {
+  html,
+  body,
+  #app {
+    height: 100dvh;
+    overflow: hidden;
+  }
+}
+
 body {
   font-family: Inter, 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+  overflow-x: hidden;
 }

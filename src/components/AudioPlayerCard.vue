@@ -41,6 +41,18 @@
 .player-range:hover::-moz-range-thumb {
   background: rgba(161, 161, 170, 0.8);
 }
+
+@media (max-width: 480px) {
+  .player-range::-webkit-slider-thumb {
+    width: 12px;
+    height: 12px;
+  }
+
+  .player-range::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+  }
+}
 </style>
 
 <template>
@@ -55,8 +67,8 @@
       @loadedmetadata="onLoadedMetadata"
     />
 
-    <div class="mb-3 flex items-center justify-between gap-2">
-      <div class="min-w-0 flex-1 text-sm text-zinc-200">
+    <div class="mb-3 flex flex-col items-start gap-1 xs:flex-row xs:items-center xs:justify-between xs:gap-2">
+      <div class="min-w-0 w-full text-sm text-zinc-200 xs:flex-1">
         <OverflowMarquee :text="title" />
       </div>
       <div class="shrink-0 whitespace-nowrap text-xs text-zinc-500/70 font-mono tabular-nums">
@@ -87,27 +99,21 @@
     <div class="flex items-center gap-2">
       <button
         type="button"
-        class="h-9 w-9 inline-flex items-center justify-center rounded-lg bg-emerald-500 text-emerald-950 transition disabled:cursor-not-allowed hover:bg-emerald-400 disabled:opacity-50"
+        class="h-10 w-10 inline-flex items-center justify-center rounded-lg bg-emerald-500 text-emerald-950 transition disabled:cursor-not-allowed hover:bg-emerald-400 disabled:opacity-50"
         :disabled="!canPlay"
         @click="togglePlay"
       >
-        <svg v-if="!isPlaying" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true">
-          <path d="M8 5v14l11-7-11-7Z" />
-        </svg>
-        <svg v-else viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true">
-          <path d="M8 5h3v14H8V5Zm5 0h3v14h-3V5Z" />
-        </svg>
+        <span v-if="!isPlaying" class="i-lucide-play h-4 w-4" aria-hidden="true" />
+        <span v-else class="i-lucide-pause h-4 w-4" aria-hidden="true" />
       </button>
 
       <button
         type="button"
-        class="h-9 w-9 inline-flex items-center justify-center rounded-lg bg-zinc-800 text-zinc-200 transition disabled:cursor-not-allowed hover:bg-zinc-700 disabled:opacity-50"
+        class="h-10 w-10 inline-flex items-center justify-center rounded-lg bg-zinc-800 text-zinc-200 transition disabled:cursor-not-allowed hover:bg-zinc-700 disabled:opacity-50"
         :disabled="!canPlay"
         @click="download"
       >
-        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M12 4v10m0 0 4-4m-4 4-4-4M4 18h16" />
-        </svg>
+        <span class="i-lucide-download h-4 w-4" aria-hidden="true" />
       </button>
     </div>
   </div>

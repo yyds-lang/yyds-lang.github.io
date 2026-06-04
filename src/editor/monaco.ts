@@ -56,13 +56,15 @@ export async function createYydsEditor(
   const runtime = await ensureShikiRuntime()
   const monaco = runtime.monaco
   ensureFormattingProvider(monaco)
+  const isNarrow = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
   const model = monaco.editor.createModel(source, 'yyds')
   const editor = monaco.editor.create(el, {
     model,
     automaticLayout: true,
     minimap: { enabled: false },
-    fontSize: 14,
-    lineNumbersMinChars: 3,
+    fontSize: isNarrow ? 13 : 14,
+    lineNumbersMinChars: isNarrow ? 2 : 3,
+    padding: { top: 8, bottom: 8 },
     scrollBeyondLastLine: false
   })
   const disposable = editor.onDidChangeModelContent(() => {

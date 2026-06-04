@@ -1,0 +1,11 @@
+minimumReleaseAgeExclude:
+  - '@yyds-lang/ast@0.0.9'
+  - '@yyds-lang/formatter@0.0.9'
+  - '@yyds-lang/language-service@0.0.9'
+  - '@yyds-lang/lexer@0.0.9'
+  - '@yyds-lang/parser@0.0.9'
+  - '@yyds-lang/semantic@0.0.9'
+
+shellEmulator: true
+
+trustPolicy: no-downgrade

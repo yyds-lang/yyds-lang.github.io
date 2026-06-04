@@ -1,9 +1,9 @@
 <template>
-  <section class="border border-zinc-800 rounded-2xl bg-zinc-900/70 p-8 space-y-6">
+  <section class="h-full overflow-y-auto border border-zinc-800 rounded-2xl bg-zinc-900/70 p-4 space-y-6 sm:p-6 md:p-8 lg:h-auto lg:overflow-visible">
     <p class="text-xs text-zinc-400 tracking-[0.2em] uppercase">
       Minimal Viable
     </p>
-    <h2 class="text-3xl font-semibold leading-tight">
+    <h2 class="text-2xl font-semibold leading-tight sm:text-3xl">
       YYDS 音乐生成器
     </h2>
     <p class="max-w-2xl text-zinc-300">
@@ -18,7 +18,7 @@
       </a>
       实现的在线音乐生成器。
     </p>
-    <div class="flex gap-3">
+    <div class="flex flex-col gap-3 xs:flex-row">
       <RouterLink
         to="/studio"
         class="inline-flex items-center rounded-lg bg-emerald-500 px-4 py-2 text-sm text-emerald-950 font-semibold transition hover:bg-emerald-400"

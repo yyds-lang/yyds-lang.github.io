@@ -51,9 +51,10 @@ async function initWasmRuntime(): Promise<void> {
     }
     return text
   })
-  const blobUrl = URL.createObjectURL(new Blob([runtimeSource], { type: 'application/javascript' }))
+  const moduleSource = `${runtimeSource}\nexport {}`
+  const blobUrl = URL.createObjectURL(new Blob([moduleSource], { type: 'application/javascript' }))
   try {
-    importScripts(blobUrl)
+    await import(/* @vite-ignore */ blobUrl)
   }
   finally {
     URL.revokeObjectURL(blobUrl)

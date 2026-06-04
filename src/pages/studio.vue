@@ -1,44 +1,67 @@
 <template>
-  <section class="grid gap-4 lg:grid-cols-[1fr_320px]">
-    <div class="border border-zinc-800 rounded-2xl bg-zinc-900/70 p-3">
-      <div class="mb-3 flex flex-wrap items-center gap-2">
-        <label class="text-xs text-zinc-300">
-          曲目
-          <select
-            :value="selectedExample"
-            class="ml-2 border border-zinc-700 rounded-lg bg-zinc-800 px-2 py-1 text-xs text-zinc-100 outline-none focus:border-emerald-400"
-            @change="onExampleChange"
+  <section
+    class="flex h-full min-h-0 flex-col gap-4 pb-[76px] lg:grid lg:h-auto lg:grid-cols-[1fr_320px] lg:pb-0"
+  >
+    <div class="flex min-h-0 flex-1 flex-col border border-zinc-800 rounded-2xl bg-zinc-900/70 p-2 sm:p-3">
+      <div class="mb-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+          <label class="flex flex-wrap items-center gap-2 text-xs text-zinc-300">
+            曲目
+            <select
+              :value="selectedExample"
+              class="border border-zinc-700 rounded-lg bg-zinc-800 px-2 py-1 text-xs text-zinc-100 outline-none focus:border-emerald-400"
+              @change="onExampleChange"
+            >
+              <option v-for="item in examples" :key="item.file" :value="item.file">
+                {{ item.title }}
+              </option>
+            </select>
+          </label>
+          <label class="flex flex-wrap items-center gap-2 text-xs text-zinc-300 lg:hidden">
+            乐器
+            <select
+              v-model="selectedInstrument"
+              class="border border-zinc-700 rounded-lg bg-zinc-800 px-2 py-1 text-xs text-zinc-100 outline-none focus:border-emerald-400"
+            >
+              <option v-for="instrument in instruments" :key="instrument" :value="instrument">
+                {{ instrument }}
+              </option>
+            </select>
+          </label>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            class="min-w-[7rem] flex-1 cursor-pointer appearance-none rounded-lg border-none bg-zinc-800 px-3 py-2.5 text-sm text-zinc-200 transition disabled:cursor-not-allowed sm:flex-none sm:py-2 hover:bg-zinc-700 disabled:opacity-60"
+            :disabled="isRendering"
+            @click="runFormat"
           >
-            <option v-for="item in examples" :key="item.file" :value="item.file">
-              {{ item.title }}
-            </option>
-          </select>
-        </label>
-        <button
-          type="button"
-          class="cursor-pointer appearance-none rounded-lg border-none bg-zinc-800 px-3 py-2 text-sm text-zinc-200 transition disabled:cursor-not-allowed hover:bg-zinc-700 disabled:opacity-60"
-          :disabled="isRendering"
-          @click="runFormat"
-        >
-          格式化
-        </button>
-        <button
-          type="button"
-          class="cursor-pointer appearance-none rounded-lg border-none bg-emerald-500 px-3 py-2 text-sm text-emerald-950 font-semibold transition disabled:cursor-not-allowed hover:bg-emerald-400 disabled:opacity-60"
-          :disabled="isRendering"
-          @click="runRender"
-        >
-          生成并播放
-        </button>
-        <StatusBadge :status="status" :text="statusText" />
+            格式化
+          </button>
+          <button
+            type="button"
+            class="min-w-[7rem] flex-1 cursor-pointer appearance-none rounded-lg border-none bg-emerald-500 px-3 py-2.5 text-sm text-emerald-950 font-semibold transition disabled:cursor-not-allowed sm:flex-none sm:py-2 hover:bg-emerald-400 disabled:opacity-60"
+            :disabled="isRendering"
+            @click="runRender"
+          >
+            生成并播放
+          </button>
+          <StatusBadge class="w-full sm:w-auto" :status="status" :text="statusText" />
+        </div>
       </div>
+      <p
+        v-if="errorText"
+        class="mb-3 border border-rose-500/40 rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-200 lg:hidden"
+      >
+        {{ errorText }}
+      </p>
       <div
         ref="editorEl"
-        class="h-[65vh] min-h-[420px] overflow-hidden border border-zinc-800 rounded-xl"
+        class="min-h-0 flex-1 overflow-hidden border border-zinc-800 rounded-xl lg:h-[65vh] lg:min-h-[420px] lg:flex-none"
       />
     </div>
 
-    <aside class="border border-zinc-800 rounded-2xl bg-zinc-900/70 p-4 space-y-4">
+    <aside class="hidden border border-zinc-800 rounded-2xl bg-zinc-900/70 p-3 space-y-4 lg:block sm:p-4">
       <h2 class="text-lg font-semibold">
         渲染面板
       </h2>
@@ -68,6 +91,10 @@
         {{ errorText }}
       </p>
     </aside>
+
+    <BottomPeekDrawer v-model="playerDrawerOpen">
+      <AudioPlayerCard :src="audioUrl" :title="songTitle" :auto-play="true" />
+    </BottomPeekDrawer>
   </section>
 </template>
 
@@ -94,6 +121,7 @@ const status = ref<'idle' | 'loading' | 'success' | 'error'>('loading')
 const statusText = ref('正在初始化 WASM...')
 const errorText = ref('')
 const audioUrl = ref('')
+const playerDrawerOpen = ref(false)
 const renderMs = ref(0)
 const durationSeconds = ref(0)
 const wavSize = ref(0)
@@ -313,6 +341,7 @@ async function runRender(): Promise<void> {
     audioUrl.value = URL.createObjectURL(wavBlob)
     status.value = 'success'
     statusText.value = '渲染成功，正在播放'
+    playerDrawerOpen.value = true
   }
   catch (error) {
     status.value = 'error'
