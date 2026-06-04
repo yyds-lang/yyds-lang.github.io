@@ -3,10 +3,16 @@
     <p class="text-xs uppercase tracking-[0.2em] text-zinc-400">Minimal Viable</p>
     <h2 class="text-3xl font-semibold leading-tight">YYDS 音乐生成器</h2>
     <p class="max-w-2xl text-zinc-300">
-      这个页面使用 Vue Router 的 pages 文件路由模式，核心渲染链路为
-      <code class="rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-100"
-        >Editor -> Worker -> WASM -> WAV</code
-      >。
+      基于
+      <a
+        href="https://github.com/plugine/yyds"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-emerald-300 underline decoration-emerald-500/60 underline-offset-2 hover:text-emerald-200"
+      >
+        plugine/yyds
+      </a>
+      实现的在线音乐生成器。
     </p>
     <div class="flex gap-3">
       <RouterLink
