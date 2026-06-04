@@ -1,0 +1,58 @@
+yyds 2
+song "human"
+tempo 120
+velocity 40
+meter 4/4
+key Bb
+unit e
+
+%F = [G#3 C4 D#4 G#4]
+%G = [F3 A#3 D4 F4]
+%Am = [C4 D#4 G4 C5]
+section common {
+  track l3chord {
+    | [%F]  [%F]  [%F]  [%F]  [%F]  [%F]  [%F]  [%F]  |
+    | [%G]  [%G]  [%G]  [%G]  [%G]  [%G]  [%G]  [%G]  |
+    | [%Am] [%Am] [%Am] [%Am] [%Am] [%Am] [%Am] [%Am] |
+    | [%Am] [%Am] [%Am] [%Am] [%Am] [%Am] [%Am] [%Am] |
+  }
+}
+
+section intro {
+  track background refer common->l3chord
+}
+
+section ch1 {
+  track[drums] low@99 {
+    | E1/4    E1/4    E1/4    E1/4 |
+    | E1/4    E1/4    E1/4    E1/4 |
+    | E1/4    E1/4    E1/4    E1/4 |
+    | E1/4    E1/4    E1/4    E1/4 |
+  }
+
+  track background refer common->l3chord
+}
+
+section ch2 {
+  track high@80 {
+    | A#4/8         D#5/8         F5/8          G5/8          A#5/8         D#5/8         F5/8          D#5/8 |
+    | A#4/8         D#5/8         F5/8          G5/8          F5/8          D#5/8         A#5/8         D#5/8 |
+    | A#4/8         D#5/8         F5/8          G5/8          A#5/8         D#5/8         F5/8          G5/8  |
+    | A#5/8         G5/8          F5/8          D#5/8         F5/16  D#5/16 F5/16  D#5/16 A#5/8         D#5/8 |
+  }
+
+  track[drums] low@60 {
+    | R/8   F#1/8 R/8   F#1/8 R/8   F#1/8 R/8   F#1/8 |
+    | R/8   F#1/8 R/8   F#1/8 R/8   F#1/8 R/8   F#1/8 |
+    | R/8   F#1/8 R/8   F#1/8 R/8   F#1/8 R/8   F#1/8 |
+    | R/8   F#1/8 R/8   F#1/8 R/8   F#1/8 R/8   F#1/8 |
+  }
+
+  track low refer ch1->low
+
+  track background@40 refer common->l3chord
+}
+
+play intro
+play ch1
+play ch2 repeat 2

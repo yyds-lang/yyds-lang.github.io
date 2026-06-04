@@ -1,0 +1,14 @@
+yyds 2
+
+song "Physical Drums"
+tempo 108
+meter 4/4
+unit s
+velocity 92
+
+section fill {
+  track[drums] kit@99 {
+    | F#1/1 |
+  }
+}
+play fill

@@ -1,0 +1,15 @@
+yyds 2
+
+song "B1 Ride Check"
+tempo 90
+meter 4/4
+unit q
+velocity 90
+
+section check {
+  track[drums] kit {
+    | B1 R B1 R |
+  }
+}
+
+play check

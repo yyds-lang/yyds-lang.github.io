@@ -1,0 +1,15 @@
+yyds 2
+
+song "F#1 Closed Hat Check"
+tempo 100
+meter 4/4
+unit e
+velocity 86
+
+section check {
+  track[drums] kit {
+    | F#1 F#1 F#1 F#1 F#1 F#1 F#1 F#1 |
+  }
+}
+
+play check

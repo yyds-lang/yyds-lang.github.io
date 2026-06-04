@@ -1,0 +1,16 @@
+yyds 2
+song "Dizi Physical Model"
+tempo 92
+meter 4/4
+key D
+
+section main repeat 2 {
+  track[dizi] lead@92 {
+    | D5/8  E5/8  G5/q        A5/8  G5/8  E5/q |
+    | D5/q        E5/8  G5/8  A5/q        D6/q |
+    | C6/8  A5/8  G5/q        E5/8  D5/8  E5/q |
+    | D5/h                    R/h              |
+  }
+}
+
+play main

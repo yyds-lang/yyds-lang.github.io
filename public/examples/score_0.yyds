@@ -1,0 +1,182 @@
+yyds 2
+song "Score 0 - Young and Beautiful"
+tempo 108
+meter 4/4
+key G
+velocity 60
+unit e
+
+%G = [G3 B3 D4]
+%A = [A3 C#4 E4]
+%Bm = [B3 D4 F#4]
+%D = [D3 F#3 A3]
+%G_mid = [B3 D4 G4]
+%G_high = [D4 G4 B4]
+%G_top = [G4 B4 D5]
+%A_mid = [C#4 E4 A4]
+%A_high = [E4 A4 C#5]
+%A_top = [A4 C#5 E5]
+%Bm_mid = [D4 F#4 B4]
+%Bm_high = [F#4 B4 D5]
+%Bm_top = [B4 D5 F#5]
+%D_mid = [D4 F#4 A4]
+%G_full = [G3 B3 D4 G4]
+%A_full = [A3 C#4 E4 A4]
+%Bm_full = [B3 D4 F#4 B4]
+%D_full = [D4 F#4 A4 D5]
+section intro {
+  track melody {
+    | R/w                                          |
+    | R/w                                          |
+    | R/w                                          |
+    | B3    C4    D4    E4    D4    B3    A3    B3 |
+    | R/h                     D4    E4    F#4   G4 |
+    | G4/q        F#4/e E4/e  D4/q        R/q      |
+  }
+
+  track right_hand {
+    | [%G]/h          [%G]/h  |
+    | [%A]/h          [%A]/h  |
+    | [%Bm]/h         [%Bm]/h |
+    | [%D]/h          [%D]/h  |
+    | [%G]/h          [%A]/h  |
+    | [%Bm]/h         [%D]/h  |
+  }
+
+  track left_hand {
+    | G2  -   D3  -   B2  -   D3  - |
+    | A2  -   E3  -   C#3 -   E3  - |
+    | B2  -   F#3 -   D3  -   F#3 - |
+    | D2  -   A2  -   F#3 -   A2  - |
+    | G2  -   D3  -   A2  -   E3  - |
+    | B2  -   F#3 -   D2  -   A2  - |
+  }
+}
+
+section verse {
+  track melody {
+    // Measures 7-14: first vocal phrase on the page.
+    | R/e   B3    C4    D4    E4    D4    B3    A3   |
+    | B3/q        R/q         B3    C4    D4    E4   |
+    | F#4/q       E4/e  D4/e  E4/q        R/q        |
+    | R/q         D4    E4    F#4   A4    G4    F#4  |
+    | E4/q        D4/e  B3/e  A3/h                   |
+    | R/q         B3    C4    D4    E4    D4    B3   |
+    | A3/q        B3/e  D4/e  F#4/q       E4/e  D4/e |
+    | B3/h                    R/h                    |
+  }
+
+  track right_hand {
+    | [%G]/h          [%G]/h  |
+    | [%A]/h          [%A]/h  |
+    | [%Bm]/h         [%Bm]/h |
+    | [%D]/h          [%D]/h  |
+    | [%G]/h          [%G]/h  |
+    | [%A]/h          [%A]/h  |
+    | [%Bm]/h         [%Bm]/h |
+    | [%D]/h          [%D]/h  |
+  }
+
+  track left_hand {
+    | G2  -   D3  -   B2  -   D3  - |
+    | A2  -   E3  -   C#3 -   E3  - |
+    | B2  -   F#3 -   D3  -   F#3 - |
+    | D2  -   A2  -   F#3 -   A2  - |
+    | G2  -   D3  -   B2  -   D3  - |
+    | A2  -   E3  -   C#3 -   E3  - |
+    | B2  -   F#3 -   D3  -   F#3 - |
+    | D2  -   A2  -   F#3 -   A2  - |
+  }
+}
+
+section build {
+  track melody {
+    // Measures 15-19: rising piano figure and lead-in.
+    | R/q         G3    A3    B3    D4    E4    F#4 |
+    | G4/q        A4/e  B4/e  A4/q        G4/q      |
+    | F#4/q       E4/e  D4/e  E4/q        F#4/q     |
+    | G4/h                    A4/q        G4/q      |
+    | F#4/h                   R/h                   |
+  }
+
+  track right_hand {
+    | [%G]/q          [%G_mid]/q      [%G_high]/q     [%G_top]/q  |
+    | [%A]/q          [%A_mid]/q      [%A_high]/q     [%A_top]/q  |
+    | [%Bm]/q         [%Bm_mid]/q     [%Bm_high]/q    [%Bm_top]/q |
+    | [%D_mid]/h                      [%D_mid]/h                  |
+    | [%D_mid]/w                                                  |
+  }
+
+  track left_hand {
+    | G2  D3  G3  D3  G2  D3  G3  D3  |
+    | A2  E3  A3  E3  A2  E3  A3  E3  |
+    | B2  F#3 B3  F#3 B2  F#3 B3  F#3 |
+    | D2  A2  D3  A2  D2  A2  D3  A2  |
+    | D2  -   A2  -   F#3 -   A2  -   |
+  }
+}
+
+section second_phrase {
+  track melody {
+    // Measures 20-23: answer phrase after the first build.
+    | R/q         D4    E4    F#4   G4    A4    G4 |
+    | F#4/q       E4/e  D4/e  B3/h                 |
+    | R/q         B3    C4    D4    E4    F#4   G4 |
+    | A4/q        G4/e  F#4/e E4/h                 |
+  }
+
+  track right_hand {
+    | [%G]/h          [%A]/h |
+    | [%Bm]/h         [%D]/h |
+    | [%G]/h          [%A]/h |
+    | [%Bm]/h         [%D]/h |
+  }
+
+  track left_hand {
+    | G2  -   D3  -   A2  -   E3  - |
+    | B2  -   F#3 -   D2  -   A2  - |
+    | G2  -   D3  -   A2  -   E3  - |
+    | B2  -   F#3 -   D2  -   A2  - |
+  }
+}
+
+section chorus {
+  track melody {
+    | R/e   B3    C4    D4    E4    D4    B3    A3   |
+    | B3/q        R/q         D4    E4    F#4   A4   |
+    | G4/q        F#4/e E4/e  D4/h                   |
+    | R/q         B3    C4    D4    E4    F#4   G4   |
+    | A4/q        B4/e  A4/e  G4/q        F#4/q      |
+    | E4/q        D4/e  B3/e  A3/h                   |
+    | B3/q        D4/e  E4/e  F#4/q       E4/e  D4/e |
+    | B3/h                    R/h                    |
+  }
+
+  track right_hand {
+    | [%G_full]/q     [%G_full]/q     [%A_full]/q     [%A_full]/q |
+    | [%Bm_full]/q    [%Bm_full]/q    [%D_full]/q     [%D_full]/q |
+    | [%G_full]/h                     [%A_full]/h                 |
+    | [%Bm_full]/h                    [%D_full]/h                 |
+    | [%G_full]/h                     [%A_full]/h                 |
+    | [%Bm_full]/h                    [%D_full]/h                 |
+    | [%G_full]/h                     [%A_full]/h                 |
+    | [%Bm_full]/h                    [%D_full]/h                 |
+  }
+
+  track left_hand {
+    | G2  D3  G3  D3  A2  E3  A3  E3 |
+    | B2  F#3 B3  F#3 D2  A2  D3  A2 |
+    | G2  -   D3  -   A2  -   E3  -  |
+    | B2  -   F#3 -   D2  -   A2  -  |
+    | G2  -   D3  -   A2  -   E3  -  |
+    | B2  -   F#3 -   D2  -   A2  -  |
+    | G2  -   D3  -   A2  -   E3  -  |
+    | B2  -   F#3 -   D2  -   A2  -  |
+  }
+}
+
+play intro
+play verse
+play build
+play second_phrase
+play chorus

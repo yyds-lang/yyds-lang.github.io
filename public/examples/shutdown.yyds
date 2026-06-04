@@ -1,0 +1,19 @@
+yyds 2
+song "Shutdown"
+tempo 120
+meter 4/4
+key C
+
+section main repeat 2 {
+  track symphony {
+    | E5/8  D5/8  C5/q        B4/8  C5/8  D5/q |
+    | A4/w                                     |
+  }
+
+  track background {
+    | F2/q        C3/8  F3/8  A3/q        G2/q  |
+    | D3/8  G3/8  B3/q        A2/q        C#4/q |
+  }
+}
+
+play main

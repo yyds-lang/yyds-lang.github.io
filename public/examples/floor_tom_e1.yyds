@@ -1,0 +1,15 @@
+yyds 2
+
+song "E1 Floor Tom Check"
+tempo 90
+meter 4/4
+unit q
+velocity 96
+
+section check {
+  track[drums] kit {
+    | E1 R E1 R |
+  }
+}
+
+play check

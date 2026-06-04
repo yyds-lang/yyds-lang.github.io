@@ -1,0 +1,54 @@
+yyds 2
+
+song "test"
+tempo 102
+meter 4/4
+key G
+unit e
+
+%G = [G3 B3 D4]
+%A = [A3 C#4 E4]
+%Bm = [B3 D4 F#4]
+%D = [D3 F#3 A3]
+%G_mid = [B3 D4 G4]
+%G_high = [D4 G4 B4]
+%G_top = [G4 B4 D5]
+%A_mid = [C#4 E4 A4]
+%A_high = [E4 A4 C#5]
+%A_top = [A4 C#5 E5]
+%Bm_mid = [D4 F#4 B4]
+%Bm_high = [F#4 B4 D5]
+%Bm_top = [B4 D5 F#5]
+%D_mid = [D4 F#4 A4]
+%G_full = [G3 B3 D4 G4]
+%A_full = [A3 C#4 E4 A4]
+%Bm_full = [B3 D4 F#4 B4]
+%D_full = [D4 F#4 A4 D5]
+
+
+section build {
+  track melody {
+    // Measures 15-19: rising piano figure and lead-in.
+    | R/q      G3   A3   B3   D4   E4   F#4  |
+    | G4/q     A4/e B4/e A4/q     G4/q       |
+    | F#4/q    E4/e D4/e E4/q     F#4/q      |
+    | G4/h             A4/q     G4/q         |
+    | F#4/h            R/h                   |
+  }
+
+  track right_hand {
+    | [%G]/q       [%G_mid]/q   [%G_high]/q  [%G_top]/q   |
+    | [%A]/q       [%A_mid]/q   [%A_high]/q  [%A_top]/q   |
+    | [%Bm]/q      [%Bm_mid]/q  [%Bm_high]/q [%Bm_top]/q  |
+    | [%D_mid]/h               [%D_mid]/h                 |
+    | [%D_mid]/w                                          |
+  }
+
+  track left_hand {
+    | G2   D3   G3   D3   G2   D3   G3   D3   |
+    | A2   E3   A3   E3   A2   E3   A3   E3   |
+    | B2   F#3  B3   F#3  B2   F#3  B3   F#3  |
+    | D2   A2   D3   A2   D2   A2   D3   A2   |
+    | D2   -    -    -    -    -    -    -    |
+  }
+}
