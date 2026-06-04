@@ -57,19 +57,9 @@
 
 <template>
   <div class="border border-zinc-800 rounded-xl bg-zinc-950 p-3">
-    <audio
-      ref="audioRef"
-      :src="src"
-      @play="isPlaying = true"
-      @pause="isPlaying = false"
-      @ended="onEnded"
-      @timeupdate="onTimeUpdate"
-      @loadedmetadata="onLoadedMetadata"
-    />
-
     <div class="mb-3 flex flex-col items-start gap-1 xs:flex-row xs:items-center xs:justify-between xs:gap-2">
       <div class="min-w-0 w-full text-sm text-zinc-200 xs:flex-1">
-        <OverflowMarquee :text="title" />
+        <OverflowMarquee :text="displayTitle" />
       </div>
       <div class="shrink-0 whitespace-nowrap text-xs text-zinc-500/70 font-mono tabular-nums">
         {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
@@ -120,33 +110,31 @@
 </template>
 
 <script setup lang="ts">
+import { useSharedAudio } from '../lib/sharedAudio'
 import OverflowMarquee from './OverflowMarquee.vue'
 
 const props = withDefaults(
   defineProps<{
-    src: string
     title?: string
-    autoPlay?: boolean
   }>(),
   {
-    title: 'YYDS Render',
-    autoPlay: true
+    title: ''
   }
 )
 
-const audioRef = ref<HTMLAudioElement | null>(null)
-const isPlaying = ref(false)
-const currentTime = ref(0)
-const duration = ref(0)
+const {
+  title: sharedTitle,
+  isPlaying,
+  currentTime,
+  duration,
+  progress,
+  canPlay,
+  togglePlay,
+  seekByProgress,
+  download
+} = useSharedAudio()
 
-const progress = computed(() => {
-  if (!duration.value) {
-    return 0
-  }
-  return (currentTime.value / duration.value) * 100
-})
-
-const canPlay = computed(() => Boolean(props.src))
+const displayTitle = computed(() => props.title || sharedTitle.value || 'YYDS Render')
 
 function formatTime(value: number): string {
   if (!Number.isFinite(value) || value <= 0) {
@@ -159,79 +147,8 @@ function formatTime(value: number): string {
   return `${mins}:${secs}`
 }
 
-async function play(): Promise<void> {
-  if (!audioRef.value || !props.src) {
-    return
-  }
-  await audioRef.value.play()
-}
-
-function pause(): void {
-  audioRef.value?.pause()
-}
-
-async function togglePlay(): Promise<void> {
-  if (!canPlay.value) {
-    return
-  }
-  if (isPlaying.value) {
-    pause()
-    return
-  }
-  await play()
-}
-
-function onTimeUpdate(): void {
-  if (!audioRef.value) {
-    return
-  }
-  currentTime.value = audioRef.value.currentTime
-}
-
-function onLoadedMetadata(): void {
-  if (!audioRef.value) {
-    return
-  }
-  duration.value = Number.isFinite(audioRef.value.duration) ? audioRef.value.duration : 0
-}
-
-function onEnded(): void {
-  isPlaying.value = false
-}
-
 function onProgressInput(event: Event): void {
-  if (!audioRef.value || !duration.value) {
-    return
-  }
   const target = event.target as HTMLInputElement
-  const ratio = Number(target.value) / 100
-  audioRef.value.currentTime = duration.value * ratio
-  currentTime.value = audioRef.value.currentTime
+  seekByProgress(Number(target.value))
 }
-
-function download(): void {
-  if (!props.src) {
-    return
-  }
-  const anchor = document.createElement('a')
-  anchor.href = props.src
-  anchor.download = `${props.title || 'yyds'}.wav`
-  anchor.click()
-}
-
-watch(
-  () => props.src,
-  async (next) => {
-    isPlaying.value = false
-    currentTime.value = 0
-    duration.value = 0
-    if (!next) {
-      return
-    }
-    await nextTick()
-    if (props.autoPlay) {
-      await play()
-    }
-  }
-)
 </script>

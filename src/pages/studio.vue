@@ -83,7 +83,7 @@
         <p>大小: {{ Math.round(wavSize / 1024) }} KB</p>
         <p>耗时: {{ renderMs }} ms</p>
       </div>
-      <AudioPlayerCard :src="audioUrl" :title="songTitle" :auto-play="true" />
+      <AudioPlayerCard :title="songTitle" />
       <p
         v-if="errorText"
         class="border border-rose-500/40 rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-200"
@@ -93,7 +93,7 @@
     </aside>
 
     <BottomPeekDrawer v-model="playerDrawerOpen">
-      <AudioPlayerCard :src="audioUrl" :title="songTitle" :auto-play="true" />
+      <AudioPlayerCard :title="songTitle" />
     </BottomPeekDrawer>
   </section>
 </template>
@@ -101,6 +101,7 @@
 <script setup lang="ts">
 import AudioPlayerCard from '../components/AudioPlayerCard.vue'
 import { createYydsEditor } from '../editor/monaco'
+import { useSharedAudio } from '../lib/sharedAudio'
 import { initWasm, renderWav } from '../lib/wasmClient'
 
 const instruments = ['piano', 'guitar', 'drums', 'dizi'] as const
@@ -128,6 +129,7 @@ const wavSize = ref(0)
 const isRendering = computed(() => status.value === 'loading')
 
 let editorHandle: Awaited<ReturnType<typeof createYydsEditor>> | null = null
+const sharedAudio = useSharedAudio()
 
 function isValidInstrument(value: string | null): value is Instrument {
   return value !== null && (instruments as readonly string[]).includes(value)
@@ -209,7 +211,14 @@ function stripTrackInstrumentHints(input: string): string {
   return input.replace(/\btrack\s*\[[^\]\r\n]+\]\s*/g, 'track ')
 }
 
+function closeDrawerOnDesktop(): void {
+  if (window.matchMedia('(min-width: 1024px)').matches) {
+    playerDrawerOpen.value = false
+  }
+}
+
 function clearAudio(): void {
+  sharedAudio.stop()
   if (audioUrl.value) {
     URL.revokeObjectURL(audioUrl.value)
     audioUrl.value = ''
@@ -339,6 +348,7 @@ async function runRender(): Promise<void> {
     wavSize.value = result.size
     const wavBlob = new Blob([result.bytes], { type: 'audio/wav' })
     audioUrl.value = URL.createObjectURL(wavBlob)
+    await sharedAudio.load(audioUrl.value, { autoPlay: true, title: songTitle.value })
     status.value = 'success'
     statusText.value = '渲染成功，正在播放'
     playerDrawerOpen.value = true
@@ -351,6 +361,7 @@ async function runRender(): Promise<void> {
 }
 
 onMounted(async () => {
+  window.addEventListener('resize', closeDrawerOnDesktop)
   const persisted = readPersistedSelection()
   if (persisted.instrument) {
     selectedInstrument.value = persisted.instrument
@@ -367,6 +378,7 @@ watch(selectedInstrument, () => {
 })
 
 onBeforeUnmount(() => {
+  window.removeEventListener('resize', closeDrawerOnDesktop)
   editorHandle?.dispose()
   clearAudio()
 })
