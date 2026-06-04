@@ -1,18 +1,18 @@
 {
   "compilerOptions": {
     "target": "es2022",
-    "module": "esnext",
     "lib": ["ES2022", "DOM"],
-    "types": ["vite/client", "node"],
-    "skipLibCheck": true,
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
     "moduleDetection": "force",
-    "noEmit": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "types": ["vite/client", "node"],
+    "allowImportingTsExtensions": true,
+    "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noEmit": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true
   },
   "include": ["src", "vite.config.ts", ".auto-generated/**/*.d.ts"]
 }

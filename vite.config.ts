@@ -1,10 +1,11 @@
+import process from 'node:process'
 import { fileURLToPath, URL } from 'node:url'
 import Vue from '@vitejs/plugin-vue'
 import UnoCSS from 'unocss/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
-import VueRouter from 'vue-router/vite'
 import { defineConfig } from 'vite'
+import VueRouter from 'vue-router/vite'
 
 const base = process.env.VITE_BASE_URL ?? '/'
 

@@ -1,3 +1,12 @@
+<template>
+  <span
+    class="inline-flex items-center border rounded-md px-3 py-1 text-xs font-medium"
+    :class="colorClass"
+  >
+    {{ text }}
+  </span>
+</template>
+
 <script setup lang="ts">
 const props = defineProps<{
   status: 'idle' | 'loading' | 'success' | 'error'
@@ -17,12 +26,3 @@ const colorClass = computed(() => {
   return 'border-zinc-700 bg-zinc-800 text-zinc-300'
 })
 </script>
-
-<template>
-  <span
-    class="inline-flex items-center rounded-md border px-3 py-1 text-xs font-medium"
-    :class="colorClass"
-  >
-    {{ text }}
-  </span>
-</template>

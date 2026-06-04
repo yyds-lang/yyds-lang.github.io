@@ -1,3 +1,118 @@
+<style scoped>
+.player-track-base {
+  background: rgba(161, 161, 170, 0.5);
+  transition: background-color 120ms ease;
+}
+
+.player-track-fill {
+  background: rgba(16, 185, 129, 0.5);
+  transition: background-color 120ms ease;
+}
+
+.player-track:hover .player-track-base {
+  background: rgba(161, 161, 170, 0.8);
+}
+
+.player-track:hover .player-track-fill {
+  background: rgba(16, 185, 129, 0.8);
+}
+
+.player-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: rgba(161, 161, 170, 0.5);
+  border: 0;
+}
+
+.player-range::-moz-range-thumb {
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: rgba(161, 161, 170, 0.5);
+  border: 0;
+}
+
+.player-range:hover::-webkit-slider-thumb {
+  background: rgba(161, 161, 170, 0.8);
+}
+
+.player-range:hover::-moz-range-thumb {
+  background: rgba(161, 161, 170, 0.8);
+}
+</style>
+
+<template>
+  <div class="border border-zinc-800 rounded-xl bg-zinc-950 p-3">
+    <audio
+      ref="audioRef"
+      :src="src"
+      @play="isPlaying = true"
+      @pause="isPlaying = false"
+      @ended="onEnded"
+      @timeupdate="onTimeUpdate"
+      @loadedmetadata="onLoadedMetadata"
+    />
+
+    <div class="mb-3 flex items-center justify-between gap-2">
+      <div class="min-w-0 flex-1 text-sm text-zinc-200">
+        <OverflowMarquee :text="title" />
+      </div>
+      <div class="shrink-0 whitespace-nowrap text-xs text-zinc-500/70 font-mono tabular-nums">
+        {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <div class="player-track relative h-6">
+        <div class="player-track-base absolute left-0 right-0 top-1/2 h-[2px] rounded -translate-y-1/2" />
+        <div
+          class="player-track-fill absolute left-0 top-1/2 h-[2px] rounded -translate-y-1/2"
+          :style="{ width: `${progress}%` }"
+        />
+        <input
+          class="player-range absolute inset-0 h-full w-full cursor-pointer appearance-none bg-transparent"
+          type="range"
+          min="0"
+          max="100"
+          step="0.1"
+          :value="progress"
+          :disabled="!canPlay"
+          @input="onProgressInput"
+        >
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        class="h-9 w-9 inline-flex items-center justify-center rounded-lg bg-emerald-500 text-emerald-950 transition disabled:cursor-not-allowed hover:bg-emerald-400 disabled:opacity-50"
+        :disabled="!canPlay"
+        @click="togglePlay"
+      >
+        <svg v-if="!isPlaying" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true">
+          <path d="M8 5v14l11-7-11-7Z" />
+        </svg>
+        <svg v-else viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true">
+          <path d="M8 5h3v14H8V5Zm5 0h3v14h-3V5Z" />
+        </svg>
+      </button>
+
+      <button
+        type="button"
+        class="h-9 w-9 inline-flex items-center justify-center rounded-lg bg-zinc-800 text-zinc-200 transition disabled:cursor-not-allowed hover:bg-zinc-700 disabled:opacity-50"
+        :disabled="!canPlay"
+        @click="download"
+      >
+        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M12 4v10m0 0 4-4m-4 4-4-4M4 18h16" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
 import OverflowMarquee from './OverflowMarquee.vue'
 
@@ -114,118 +229,3 @@ watch(
   }
 )
 </script>
-
-<template>
-  <div class="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
-    <audio
-      ref="audioRef"
-      :src="src"
-      @play="isPlaying = true"
-      @pause="isPlaying = false"
-      @ended="onEnded"
-      @timeupdate="onTimeUpdate"
-      @loadedmetadata="onLoadedMetadata"
-    />
-
-    <div class="mb-3 flex items-center justify-between gap-2">
-      <div class="min-w-0 flex-1 text-sm text-zinc-200">
-        <OverflowMarquee :text="title" />
-      </div>
-      <div class="shrink-0 whitespace-nowrap text-xs text-zinc-500/70 font-mono tabular-nums">
-        {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
-      </div>
-    </div>
-
-    <div class="mb-3">
-      <div class="player-track relative h-6">
-        <div class="player-track-base absolute left-0 right-0 top-1/2 h-[2px] -translate-y-1/2 rounded" />
-        <div
-          class="player-track-fill absolute left-0 top-1/2 h-[2px] -translate-y-1/2 rounded"
-          :style="{ width: `${progress}%` }"
-        />
-        <input
-          class="player-range absolute inset-0 h-full w-full cursor-pointer appearance-none bg-transparent"
-          type="range"
-          min="0"
-          max="100"
-          step="0.1"
-          :value="progress"
-          :disabled="!canPlay"
-          @input="onProgressInput"
-        />
-      </div>
-    </div>
-
-    <div class="flex items-center gap-2">
-      <button
-        type="button"
-        class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500 text-emerald-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
-        :disabled="!canPlay"
-        @click="togglePlay"
-      >
-        <svg v-if="!isPlaying" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true">
-          <path d="M8 5v14l11-7-11-7Z" />
-        </svg>
-        <svg v-else viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor" aria-hidden="true">
-          <path d="M8 5h3v14H8V5Zm5 0h3v14h-3V5Z" />
-        </svg>
-      </button>
-
-      <button
-        type="button"
-        class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-800 text-zinc-200 transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50"
-        :disabled="!canPlay"
-        @click="download"
-      >
-        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M12 4v10m0 0 4-4m-4 4-4-4M4 18h16" />
-        </svg>
-      </button>
-    </div>
-  </div>
-</template>
-
-<style scoped>
-.player-track-base {
-  background: rgba(161, 161, 170, 0.5);
-  transition: background-color 120ms ease;
-}
-
-.player-track-fill {
-  background: rgba(16, 185, 129, 0.5);
-  transition: background-color 120ms ease;
-}
-
-.player-track:hover .player-track-base {
-  background: rgba(161, 161, 170, 0.8);
-}
-
-.player-track:hover .player-track-fill {
-  background: rgba(16, 185, 129, 0.8);
-}
-
-.player-range::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 4px;
-  height: 4px;
-  border-radius: 9999px;
-  background: rgba(161, 161, 170, 0.5);
-  border: 0;
-}
-
-.player-range::-moz-range-thumb {
-  width: 4px;
-  height: 4px;
-  border-radius: 9999px;
-  background: rgba(161, 161, 170, 0.5);
-  border: 0;
-}
-
-.player-range:hover::-webkit-slider-thumb {
-  background: rgba(161, 161, 170, 0.8);
-}
-
-.player-range:hover::-moz-range-thumb {
-  background: rgba(161, 161, 170, 0.8);
-}
-</style>

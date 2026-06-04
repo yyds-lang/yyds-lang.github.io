@@ -6,7 +6,7 @@ declare const self: DedicatedWorkerGlobalScope
 
 interface GoLike {
   importObject: WebAssembly.Imports
-  run(instance: WebAssembly.Instance): Promise<void> | void
+  run: (instance: WebAssembly.Instance) => Promise<void> | void
 }
 
 declare global {
@@ -45,13 +45,19 @@ async function initWasmRuntime(): Promise<void> {
     const text = await res.text()
     if (looksLikeHtml(text)) {
       throw new Error(
-        `Invalid wasm runtime response from ${runtimePath}. ` +
-          'Expected JavaScript, but got HTML. Please ensure public/wasm/wasm_exec.js exists.'
+        `Invalid wasm runtime response from ${runtimePath}. `
+        + 'Expected JavaScript, but got HTML. Please ensure public/wasm/wasm_exec.js exists.'
       )
     }
     return text
   })
-  ;(0, eval)(runtimeSource)
+  const blobUrl = URL.createObjectURL(new Blob([runtimeSource], { type: 'application/javascript' }))
+  try {
+    importScripts(blobUrl)
+  }
+  finally {
+    URL.revokeObjectURL(blobUrl)
+  }
 
   if (!self.Go) {
     throw new Error('Go runtime is not available')
@@ -69,7 +75,8 @@ async function instantiateWasm(
   if ('instantiateStreaming' in WebAssembly) {
     try {
       return await WebAssembly.instantiateStreaming(fetch(url), imports)
-    } catch (error) {
+    }
+    catch (error) {
       if (!String(error).includes('MIME')) {
         throw error
       }
@@ -82,8 +89,8 @@ async function instantiateWasm(
     const contentType = res.headers.get('content-type')?.toLowerCase() ?? ''
     if (contentType.includes('text/html')) {
       throw new Error(
-        `Invalid wasm binary response from ${url}. ` +
-          'Expected WebAssembly binary, but got HTML. Please ensure public/wasm/yyds.wasm exists.'
+        `Invalid wasm binary response from ${url}. `
+        + 'Expected WebAssembly binary, but got HTML. Please ensure public/wasm/yyds.wasm exists.'
       )
     }
     return res.arrayBuffer()
@@ -97,7 +104,7 @@ async function waitForExports(): Promise<void> {
     if (self.yydsRenderWav) {
       return
     }
-    await new Promise((resolve) => setTimeout(resolve, 16))
+    await new Promise(resolve => setTimeout(resolve, 16))
   }
   throw new Error('YYDS wasm exports were not registered')
 }
@@ -128,26 +135,26 @@ self.onmessage = async (event: MessageEvent<WorkerRequest>) => {
     if (message.type === 'render') {
       const result = self.yydsRenderWav?.(message.payload.source, message.payload.instrument) as
         | {
-            ok?: boolean
-            wav?: Uint8Array
-            size?: number
-            durationSeconds?: number
-            roll?: {
-              notes?: Array<{
-                start: number
-                duration: number
-                pitch: number
-                velocity: number
-                symbol: string
-                instrument: string
-              }>
-              totalTicks?: number
-              minPitch?: number
-              maxPitch?: number
-              tempo?: number
-            }
-            error?: string
+          ok?: boolean
+          wav?: Uint8Array
+          size?: number
+          durationSeconds?: number
+          roll?: {
+            notes?: Array<{
+              start: number
+              duration: number
+              pitch: number
+              velocity: number
+              symbol: string
+              instrument: string
+            }>
+            totalTicks?: number
+            minPitch?: number
+            maxPitch?: number
+            tempo?: number
           }
+          error?: string
+        }
         | undefined
 
       if (!result?.ok || !result.wav) {
@@ -174,9 +181,9 @@ self.onmessage = async (event: MessageEvent<WorkerRequest>) => {
         },
         [wav]
       )
-      return
     }
-  } catch (error) {
+  }
+  catch (error) {
     post({
       id: message.id,
       ok: false,

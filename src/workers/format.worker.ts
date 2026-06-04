@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 
-import { formatDocument } from '@yyds-lang/language-service'
 import type { FormatWorkerRequest, FormatWorkerResponse } from './formatProtocol'
+import { formatDocument } from '@yyds-lang/language-service'
 
 declare const self: DedicatedWorkerGlobalScope
 
@@ -13,7 +13,7 @@ self.onmessage = (event: MessageEvent<FormatWorkerRequest>) => {
   const { id, source } = event.data
   try {
     const result = formatDocument(source)
-    const error = result.diagnostics.find((item) => item.severity === 'error')
+    const error = result.diagnostics.find(item => item.severity === 'error')
     if (error) {
       const response: FormatWorkerResponse = {
         id,
@@ -31,7 +31,8 @@ self.onmessage = (event: MessageEvent<FormatWorkerRequest>) => {
       }
     }
     self.postMessage(response)
-  } catch (error) {
+  }
+  catch (error) {
     const response: FormatWorkerResponse = {
       id,
       ok: false,

@@ -1,7 +1,80 @@
+<template>
+  <section class="grid gap-4 lg:grid-cols-[1fr_320px]">
+    <div class="border border-zinc-800 rounded-2xl bg-zinc-900/70 p-3">
+      <div class="mb-3 flex flex-wrap items-center gap-2">
+        <label class="text-xs text-zinc-300">
+          曲目
+          <select
+            :value="selectedExample"
+            class="ml-2 border border-zinc-700 rounded-lg bg-zinc-800 px-2 py-1 text-xs text-zinc-100 outline-none focus:border-emerald-400"
+            @change="onExampleChange"
+          >
+            <option v-for="item in examples" :key="item.file" :value="item.file">
+              {{ item.title }}
+            </option>
+          </select>
+        </label>
+        <button
+          type="button"
+          class="cursor-pointer appearance-none rounded-lg border-none bg-zinc-800 px-3 py-2 text-sm text-zinc-200 transition disabled:cursor-not-allowed hover:bg-zinc-700 disabled:opacity-60"
+          :disabled="isRendering"
+          @click="runFormat"
+        >
+          格式化
+        </button>
+        <button
+          type="button"
+          class="cursor-pointer appearance-none rounded-lg border-none bg-emerald-500 px-3 py-2 text-sm text-emerald-950 font-semibold transition disabled:cursor-not-allowed hover:bg-emerald-400 disabled:opacity-60"
+          :disabled="isRendering"
+          @click="runRender"
+        >
+          生成并播放
+        </button>
+        <StatusBadge :status="status" :text="statusText" />
+      </div>
+      <div
+        ref="editorEl"
+        class="h-[65vh] min-h-[420px] overflow-hidden border border-zinc-800 rounded-xl"
+      />
+    </div>
+
+    <aside class="border border-zinc-800 rounded-2xl bg-zinc-900/70 p-4 space-y-4">
+      <h2 class="text-lg font-semibold">
+        渲染面板
+      </h2>
+      <label class="block text-sm text-zinc-300">
+        乐器
+        <select
+          v-model="selectedInstrument"
+          class="mt-1 w-full border border-zinc-700 rounded-lg bg-zinc-800 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-emerald-400"
+        >
+          <option v-for="instrument in instruments" :key="instrument" :value="instrument">
+            {{ instrument }}
+          </option>
+        </select>
+      </label>
+      <div
+        class="border border-zinc-800 rounded-lg bg-zinc-950 p-3 text-sm text-zinc-300 space-y-1"
+      >
+        <p>时长: {{ durationSeconds.toFixed(2) }}s</p>
+        <p>大小: {{ Math.round(wavSize / 1024) }} KB</p>
+        <p>耗时: {{ renderMs }} ms</p>
+      </div>
+      <AudioPlayerCard :src="audioUrl" :title="songTitle" :auto-play="true" />
+      <p
+        v-if="errorText"
+        class="border border-rose-500/40 rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-200"
+      >
+        {{ errorText }}
+      </p>
+    </aside>
+  </section>
+</template>
+
 <script setup lang="ts">
+import AudioPlayerCard from '../components/AudioPlayerCard.vue'
 import { createYydsEditor } from '../editor/monaco'
 import { initWasm, renderWav } from '../lib/wasmClient'
-import AudioPlayerCard from '../components/AudioPlayerCard.vue'
 
 const instruments = ['piano', 'guitar', 'drums', 'dizi'] as const
 type Instrument = (typeof instruments)[number]
@@ -32,7 +105,7 @@ function isValidInstrument(value: string | null): value is Instrument {
   return value !== null && (instruments as readonly string[]).includes(value)
 }
 
-function readPersistedSelection(): { example: string; instrument: Instrument | null } {
+function readPersistedSelection(): { example: string, instrument: Instrument | null } {
   if (typeof window === 'undefined') {
     return { example: '', instrument: null }
   }
@@ -43,7 +116,8 @@ function readPersistedSelection(): { example: string; instrument: Instrument | n
       example,
       instrument: isValidInstrument(instrumentRaw) ? instrumentRaw : null
     }
-  } catch {
+  }
+  catch {
     return { example: '', instrument: null }
   }
 }
@@ -57,7 +131,8 @@ function persistSelection(): void {
       window.localStorage.setItem(EXAMPLE_STORAGE_KEY, selectedExample.value)
     }
     window.localStorage.setItem(INSTRUMENT_STORAGE_KEY, selectedInstrument.value)
-  } catch {
+  }
+  catch {
     // Ignore localStorage failures (e.g. private mode restrictions).
   }
 }
@@ -121,7 +196,8 @@ async function bootstrap(): Promise<void> {
     await initWasm()
     status.value = 'idle'
     statusText.value = '就绪'
-  } catch (error) {
+  }
+  catch (error) {
     status.value = 'error'
     statusText.value = '初始化失败'
     errorText.value = toErrorMessage(error)
@@ -138,18 +214,19 @@ async function loadExamples(
       throw new Error('示例曲目清单加载失败')
     }
     examples.value = (await response.json()) as ExampleItem[]
-    const restoredExample = preferredExample && examples.value.some((item) => item.file === preferredExample)
+    const restoredExample = preferredExample && examples.value.some(item => item.file === preferredExample)
       ? preferredExample
       : ''
-    const defaultExample =
-      restoredExample ||
-      examples.value.find((item) => item.file === 'doubletiger.yyds')?.file ||
-      examples.value[0]?.file ||
-      ''
+    const defaultExample
+      = restoredExample
+        || examples.value.find(item => item.file === 'doubletiger.yyds')?.file
+        || examples.value[0]?.file
+        || ''
     if (defaultExample) {
       await loadExample(defaultExample, preferredInstrument)
     }
-  } catch (error) {
+  }
+  catch (error) {
     errorText.value = toErrorMessage(error)
   }
 }
@@ -174,14 +251,16 @@ async function loadExample(file: string, preferredInstrument: Instrument | null 
     const inferredInstrument = inferInstrumentFromSource(formattedSource)
     if (preferredInstrument) {
       selectedInstrument.value = preferredInstrument
-    } else if (inferredInstrument) {
+    }
+    else if (inferredInstrument) {
       selectedInstrument.value = inferredInstrument
     }
     selectedExample.value = file
     persistSelection()
     status.value = 'success'
     statusText.value = '曲目已加载并格式化'
-  } catch (error) {
+  }
+  catch (error) {
     status.value = 'error'
     statusText.value = '曲目加载失败'
     errorText.value = toErrorMessage(error)
@@ -205,7 +284,8 @@ async function runFormat(): Promise<void> {
     songTitle.value = parseSongTitle(editorHandle.getValue())
     status.value = 'success'
     statusText.value = '格式化完成'
-  } catch (error) {
+  }
+  catch (error) {
     status.value = 'error'
     statusText.value = '格式化失败'
     errorText.value = toErrorMessage(error)
@@ -233,7 +313,8 @@ async function runRender(): Promise<void> {
     audioUrl.value = URL.createObjectURL(wavBlob)
     status.value = 'success'
     statusText.value = '渲染成功，正在播放'
-  } catch (error) {
+  }
+  catch (error) {
     status.value = 'error'
     statusText.value = '渲染失败'
     errorText.value = toErrorMessage(error)
@@ -261,74 +342,3 @@ onBeforeUnmount(() => {
   clearAudio()
 })
 </script>
-
-<template>
-  <section class="grid gap-4 lg:grid-cols-[1fr_320px]">
-    <div class="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-3">
-      <div class="mb-3 flex flex-wrap items-center gap-2">
-        <label class="text-xs text-zinc-300">
-          曲目
-          <select
-            :value="selectedExample"
-            class="ml-2 rounded-lg border border-zinc-700 bg-zinc-800 px-2 py-1 text-xs text-zinc-100 outline-none focus:border-emerald-400"
-            @change="onExampleChange"
-          >
-            <option v-for="item in examples" :key="item.file" :value="item.file">
-              {{ item.title }}
-            </option>
-          </select>
-        </label>
-        <button
-          type="button"
-          class="cursor-pointer appearance-none border-none rounded-lg bg-zinc-800 px-3 py-2 text-sm text-zinc-200 transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
-          :disabled="isRendering"
-          @click="runFormat"
-        >
-          格式化
-        </button>
-        <button
-          type="button"
-          class="cursor-pointer appearance-none border-none rounded-lg bg-emerald-500 px-3 py-2 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
-          :disabled="isRendering"
-          @click="runRender"
-        >
-          生成并播放
-        </button>
-        <StatusBadge :status="status" :text="statusText" />
-      </div>
-      <div
-        ref="editorEl"
-        class="h-[65vh] min-h-[420px] overflow-hidden rounded-xl border border-zinc-800"
-      />
-    </div>
-
-    <aside class="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
-      <h2 class="text-lg font-semibold">渲染面板</h2>
-      <label class="block text-sm text-zinc-300">
-        乐器
-        <select
-          v-model="selectedInstrument"
-          class="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-emerald-400"
-        >
-          <option v-for="instrument in instruments" :key="instrument" :value="instrument">
-            {{ instrument }}
-          </option>
-        </select>
-      </label>
-      <div
-        class="space-y-1 rounded-lg border border-zinc-800 bg-zinc-950 p-3 text-sm text-zinc-300"
-      >
-        <p>时长: {{ durationSeconds.toFixed(2) }}s</p>
-        <p>大小: {{ Math.round(wavSize / 1024) }} KB</p>
-        <p>耗时: {{ renderMs }} ms</p>
-      </div>
-      <AudioPlayerCard :src="audioUrl" :title="songTitle" :auto-play="true" />
-      <p
-        v-if="errorText"
-        class="rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"
-      >
-        {{ errorText }}
-      </p>
-    </aside>
-  </section>
-</template>

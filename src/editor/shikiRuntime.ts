@@ -2,7 +2,7 @@ import { init } from 'modern-monaco/core'
 import { createYydsMonacoRuntime } from 'yyds-lang-shiki/monaco'
 
 type MonacoRuntime = Awaited<ReturnType<typeof init>>
-type ShikiRuntime = { monaco: MonacoRuntime }
+interface ShikiRuntime { monaco: MonacoRuntime }
 const DEFAULT_THEME = 'vitesse-dark'
 
 let runtimePromise: Promise<ShikiRuntime> | undefined
@@ -21,7 +21,8 @@ export async function ensureShikiRuntime(): Promise<ShikiRuntime> {
   runtimePromise ??= bootstrapRuntime()
   try {
     return await runtimePromise
-  } catch (error) {
+  }
+  catch (error) {
     runtimePromise = undefined
     throw error
   }

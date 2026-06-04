@@ -1,3 +1,80 @@
+<style scoped>
+.overflow-marquee {
+  position: relative;
+  min-width: 0;
+}
+
+.overflow-marquee-static {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.overflow-marquee-viewport {
+  overflow: hidden;
+  white-space: nowrap;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black var(--marquee-edge-fade),
+    black calc(100% - var(--marquee-edge-fade)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black var(--marquee-edge-fade),
+    black calc(100% - var(--marquee-edge-fade)),
+    transparent 100%
+  );
+}
+
+.overflow-marquee-track {
+  display: inline-flex;
+  width: max-content;
+  gap: var(--marquee-gap);
+  animation: overflow-marquee-scroll var(--marquee-duration) linear infinite;
+  will-change: transform;
+}
+
+.overflow-marquee-text {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.overflow-marquee-measure {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@keyframes overflow-marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-1 * var(--marquee-distance)));
+  }
+}
+</style>
+
+<template>
+  <div ref="containerRef" class="overflow-marquee">
+    <div v-if="isOverflow" class="overflow-marquee-viewport" :style="marqueeStyle">
+      <div class="overflow-marquee-track">
+        <span class="overflow-marquee-text">{{ text }}</span>
+        <span class="overflow-marquee-text" aria-hidden="true">{{ text }}</span>
+      </div>
+    </div>
+
+    <span v-else class="overflow-marquee-static">{{ text }}</span>
+
+    <span ref="measureRef" class="overflow-marquee-measure" aria-hidden="true">{{ text }}</span>
+  </div>
+</template>
+
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
@@ -65,80 +142,3 @@ watch(
   }
 )
 </script>
-
-<template>
-  <div ref="containerRef" class="overflow-marquee">
-    <div v-if="isOverflow" class="overflow-marquee-viewport" :style="marqueeStyle">
-      <div class="overflow-marquee-track">
-        <span class="overflow-marquee-text">{{ text }}</span>
-        <span class="overflow-marquee-text" aria-hidden="true">{{ text }}</span>
-      </div>
-    </div>
-
-    <span v-else class="overflow-marquee-static">{{ text }}</span>
-
-    <span ref="measureRef" class="overflow-marquee-measure" aria-hidden="true">{{ text }}</span>
-  </div>
-</template>
-
-<style scoped>
-.overflow-marquee {
-  position: relative;
-  min-width: 0;
-}
-
-.overflow-marquee-static {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.overflow-marquee-viewport {
-  overflow: hidden;
-  white-space: nowrap;
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    black var(--marquee-edge-fade),
-    black calc(100% - var(--marquee-edge-fade)),
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    black var(--marquee-edge-fade),
-    black calc(100% - var(--marquee-edge-fade)),
-    transparent 100%
-  );
-}
-
-.overflow-marquee-track {
-  display: inline-flex;
-  width: max-content;
-  gap: var(--marquee-gap);
-  animation: overflow-marquee-scroll var(--marquee-duration) linear infinite;
-  will-change: transform;
-}
-
-.overflow-marquee-text {
-  flex: 0 0 auto;
-  white-space: nowrap;
-}
-
-.overflow-marquee-measure {
-  position: absolute;
-  visibility: hidden;
-  pointer-events: none;
-  white-space: nowrap;
-}
-
-@keyframes overflow-marquee-scroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(calc(-1 * var(--marquee-distance)));
-  }
-}
-</style>

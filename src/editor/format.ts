@@ -3,7 +3,7 @@ import { formatInWorker } from '../lib/formatClient'
 
 export function formatYydsSource(source: string): string {
   const result = formatDocument(source)
-  const error = result.diagnostics.find((item) => item.severity === 'error')
+  const error = result.diagnostics.find(item => item.severity === 'error')
   if (error) {
     throw new Error(error.message)
   }

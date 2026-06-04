@@ -1,5 +1,5 @@
-import { ensureShikiRuntime } from './shikiRuntime'
 import { formatYydsSourceInWorker } from './format'
+import { ensureShikiRuntime } from './shikiRuntime'
 
 const DEFAULT_SOURCE = `yyds 2
 song "Demo"
@@ -35,7 +35,8 @@ function ensureFormattingProvider(
           return []
         }
         return [{ range: model.getFullModelRange(), text: formatted }]
-      } catch {
+      }
+      catch {
         return []
       }
     }
