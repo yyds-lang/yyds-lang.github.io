@@ -3,5 +3,8 @@ dist
 .DS_Store
 .auto-generated
 
+# AI
+.qoder
+
 # eslint
 .eslintcache
