@@ -1,3 +1,53 @@
+<template>
+  <Teleport to="body">
+    <Transition
+      enter-active-class="transition-opacity duration-200 ease-out"
+      leave-active-class="transition-opacity duration-200 ease-in"
+      enter-from-class="opacity-0"
+      leave-to-class="opacity-0"
+    >
+      <button
+        v-if="expanded"
+        type="button"
+        class="fixed inset-0 z-40 bg-black/50 lg:hidden"
+        aria-label="关闭播放面板"
+        @click="close"
+      />
+    </Transition>
+
+    <div
+      class="fixed inset-x-0 bottom-0 z-50 transition-transform duration-300 ease-out lg:hidden"
+      :style="{
+        transform: expanded
+          ? 'translateY(0)'
+          : `translateY(calc(100% - ${peekHeight}px))`
+      }"
+      @click="onPeekClick"
+    >
+      <div
+        class="border border-zinc-800 rounded-t-2xl bg-zinc-900/95 shadow-[0_-8px_30px_rgba(0,0,0,0.45)] backdrop-blur-sm"
+      >
+        <button
+          type="button"
+          class="w-full flex flex-col items-center px-4 pb-1 pt-2 outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60"
+          :aria-expanded="expanded"
+          aria-label="展开或收起播放面板"
+          @click.stop="toggle"
+        >
+          <span class="h-1 w-10 rounded-full bg-zinc-600" />
+        </button>
+
+        <ScrollArea
+          class="max-h-[min(70vh,520px)] px-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+          @click.stop
+        >
+          <slot />
+        </ScrollArea>
+      </div>
+    </div>
+  </Teleport>
+</template>
+
 <script setup lang="ts">
 import { isLargeScreenViewport } from '../composables/useLargeScreen'
 
@@ -53,53 +103,3 @@ onBeforeUnmount(() => {
   }
 })
 </script>
-
-<template>
-  <Teleport to="body">
-    <Transition
-      enter-active-class="transition-opacity duration-200 ease-out"
-      leave-active-class="transition-opacity duration-200 ease-in"
-      enter-from-class="opacity-0"
-      leave-to-class="opacity-0"
-    >
-      <button
-        v-if="expanded"
-        type="button"
-        class="fixed inset-0 z-40 bg-black/50 lg:hidden"
-        aria-label="关闭播放面板"
-        @click="close"
-      />
-    </Transition>
-
-    <div
-      class="fixed inset-x-0 bottom-0 z-50 transition-transform duration-300 ease-out lg:hidden"
-      :style="{
-        transform: expanded
-          ? 'translateY(0)'
-          : `translateY(calc(100% - ${peekHeight}px))`,
-      }"
-      @click="onPeekClick"
-    >
-      <div
-        class="border border-zinc-800 rounded-t-2xl bg-zinc-900/95 shadow-[0_-8px_30px_rgba(0,0,0,0.45)] backdrop-blur-sm"
-      >
-        <button
-          type="button"
-          class="w-full flex flex-col items-center px-4 pt-2 pb-1 outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60"
-          :aria-expanded="expanded"
-          aria-label="展开或收起播放面板"
-          @click.stop="toggle"
-        >
-          <span class="h-1 w-10 rounded-full bg-zinc-600" />
-        </button>
-
-        <div
-          class="max-h-[min(70vh,520px)] overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
-          @click.stop
-        >
-          <slot />
-        </div>
-      </div>
-    </div>
-  </Teleport>
-</template>

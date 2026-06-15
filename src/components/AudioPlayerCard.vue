@@ -59,7 +59,12 @@
   <div class="border border-zinc-800 rounded-xl bg-zinc-950 p-3">
     <div class="mb-3 flex flex-col items-start gap-1 xs:flex-row xs:items-center xs:justify-between xs:gap-2">
       <div class="min-w-0 w-full text-sm text-zinc-200 xs:flex-1">
-        <OverflowMarquee :text="displayTitle" />
+        <span
+          v-if="!displayTitle"
+          class="i-eos-icons-loading inline-block h-4 w-4 animate-spin text-zinc-500"
+          aria-hidden="true"
+        />
+        <OverflowMarquee v-else :text="displayTitle" />
       </div>
       <div class="shrink-0 whitespace-nowrap text-xs text-zinc-500/70 font-mono tabular-nums">
         {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
@@ -139,7 +144,7 @@ const {
   download
 } = useSharedAudio()
 
-const displayTitle = computed(() => props.title || sharedTitle.value || 'YYDS Render')
+const displayTitle = computed(() => props.title || sharedTitle.value || '')
 
 function formatTime(value: number): string {
   if (!Number.isFinite(value) || value <= 0) {

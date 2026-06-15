@@ -1,5 +1,5 @@
 <template>
-  <section class="h-full overflow-y-auto border border-zinc-800 rounded-2xl bg-zinc-900/70 p-4 space-y-6 sm:p-6 md:p-8 lg:h-auto lg:overflow-visible">
+  <section class="h-full overflow-y-auto border border-zinc-800 rounded-2xl bg-zinc-900/70 p-4 lg:h-auto space-y-6 lg:overflow-visible md:p-8 sm:p-6">
     <p class="text-xs text-zinc-400 tracking-[0.2em] uppercase">
       Minimal Viable
     </p>

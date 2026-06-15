@@ -1,48 +1,3 @@
-<script setup lang="ts">
-import { isLargeScreenViewport } from '../composables/useLargeScreen'
-
-const props = defineProps<{
-  modelValue?: boolean
-  title?: string
-  mobileOnly?: boolean
-}>()
-
-const panelClass = computed(() => (
-  props.mobileOnly ? 'lg:hidden' : ''
-))
-
-const emit = defineEmits<{
-  'update:modelValue': [value: boolean]
-}>()
-
-const open = computed({
-  get: () => props.modelValue ?? false,
-  set: (value: boolean) => emit('update:modelValue', value)
-})
-
-function close(): void {
-  open.value = false
-}
-
-watch(open, (isOpen) => {
-  if (typeof document === 'undefined') {
-    return
-  }
-  const isDesktop = isLargeScreenViewport()
-  if (props.mobileOnly && isDesktop) {
-    document.body.style.overflow = ''
-    return
-  }
-  document.body.style.overflow = isOpen ? 'hidden' : ''
-})
-
-onBeforeUnmount(() => {
-  if (typeof document !== 'undefined') {
-    document.body.style.overflow = ''
-  }
-})
-</script>
-
 <template>
   <Teleport to="body">
     <Transition
@@ -84,10 +39,57 @@ onBeforeUnmount(() => {
             <span class="i-lucide-x h-5 w-5" aria-hidden="true" />
           </button>
         </div>
-        <nav class="flex flex-col gap-1 p-3" @click="close">
-          <slot />
-        </nav>
+        <ScrollArea class="flex-1">
+          <nav class="flex flex-col gap-1 p-3" @click="close">
+            <slot />
+          </nav>
+        </ScrollArea>
       </div>
     </div>
   </Teleport>
 </template>
+
+<script setup lang="ts">
+import { isLargeScreenViewport } from '../composables/useLargeScreen'
+
+const props = defineProps<{
+  modelValue?: boolean
+  title?: string
+  mobileOnly?: boolean
+}>()
+
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean]
+}>()
+
+const panelClass = computed(() => (
+  props.mobileOnly ? 'lg:hidden' : ''
+))
+
+const open = computed({
+  get: () => props.modelValue ?? false,
+  set: (value: boolean) => emit('update:modelValue', value)
+})
+
+function close(): void {
+  open.value = false
+}
+
+watch(open, (isOpen) => {
+  if (typeof document === 'undefined') {
+    return
+  }
+  const isDesktop = isLargeScreenViewport()
+  if (props.mobileOnly && isDesktop) {
+    document.body.style.overflow = ''
+    return
+  }
+  document.body.style.overflow = isOpen ? 'hidden' : ''
+})
+
+onBeforeUnmount(() => {
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = ''
+  }
+})
+</script>

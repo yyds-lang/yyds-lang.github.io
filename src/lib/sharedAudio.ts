@@ -7,7 +7,7 @@ let listenersBound = false
 let ownedObjectUrl: string | null = null
 
 const src = ref('')
-const title = ref('YYDS Render')
+const title = ref('')
 const isPlaying = ref(false)
 const currentTime = ref(0)
 const duration = ref(0)

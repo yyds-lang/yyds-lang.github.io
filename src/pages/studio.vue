@@ -1,116 +1,133 @@
 <template>
   <section
-    class="flex h-full min-h-0 flex-col gap-4 pb-[76px] lg:grid lg:h-auto lg:grid-cols-[1fr_320px] lg:pb-0"
+    class="h-full min-h-0 flex flex-col gap-4 pb-[76px] lg:grid lg:grid-cols-[1fr_320px] lg:h-auto lg:pb-0"
   >
-    <div class="flex min-h-0 flex-1 flex-col border border-zinc-800 rounded-2xl bg-zinc-900/70 p-2 sm:p-3">
-      <div class="mb-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+    <div class="min-h-0 flex flex-1 flex-col border border-zinc-800 rounded-2xl bg-zinc-900/70 p-2 sm:p-3">
+      <div class="mb-3 flex items-center justify-between gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <label class="flex flex-wrap items-center gap-2 text-xs text-zinc-300">
             曲目
-            <span
-              v-if="isExampleSelectLoading"
-              class="inline-flex items-center gap-1.5 border border-zinc-700 rounded-lg bg-zinc-800 px-2 py-1 text-xs text-zinc-400"
-            >
-              <span class="i-eos-icons-loading h-3.5 w-3.5 shrink-0 animate-spin" aria-hidden="true" />
-              加载中...
-            </span>
-            <select
-              v-else
-              :value="selectedExample"
-              class="border border-zinc-700 rounded-lg bg-zinc-800 px-2 py-1 text-xs text-zinc-100 outline-none focus:border-emerald-400"
-              @change="onExampleChange"
-            >
-              <option v-for="item in examples" :key="item.file" :value="item.file">
-                {{ item.title }}
-              </option>
-            </select>
+            <SelectField
+              :model-value="selectedExample"
+              :options="trackOptions"
+              :loading="examplesLoading || exampleLoading"
+              :placeholder="currentName || '自定义'"
+              loading-text="加载中"
+              trigger-width="12rem"
+              @update:model-value="onTrackSelect"
+            />
           </label>
-          <label class="flex flex-wrap items-center gap-2 text-xs text-zinc-300 lg:hidden">
+          <label class="flex flex-wrap items-center gap-2 text-xs text-zinc-300">
             乐器
-            <select
+            <SelectField
               v-model="selectedInstrument"
-              class="border border-zinc-700 rounded-lg bg-zinc-800 px-2 py-1 text-xs text-zinc-100 outline-none focus:border-emerald-400"
-            >
-              <option v-for="instrument in instruments" :key="instrument" :value="instrument">
-                {{ instrument }}
-              </option>
-            </select>
+              :options="instrumentOptions"
+            />
           </label>
-        </div>
-        <div class="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            class="min-w-[7rem] flex-1 cursor-pointer appearance-none rounded-lg border-none bg-zinc-800 px-3 py-2.5 text-sm text-zinc-200 transition disabled:cursor-not-allowed sm:flex-none sm:py-2 hover:bg-zinc-700 disabled:opacity-60"
+            class="h-9 w-9 inline-flex cursor-pointer appearance-none items-center justify-center rounded-lg border-none bg-emerald-500 text-emerald-950 transition disabled:cursor-not-allowed hover:bg-emerald-400 disabled:opacity-60"
             :disabled="isRendering"
-            @click="runFormat"
-          >
-            格式化
-          </button>
-          <button
-            type="button"
-            class="min-w-[7rem] flex-1 cursor-pointer appearance-none rounded-lg border-none bg-emerald-500 px-3 py-2.5 text-sm text-emerald-950 font-semibold transition disabled:cursor-not-allowed sm:flex-none sm:py-2 hover:bg-emerald-400 disabled:opacity-60"
-            :disabled="isRendering"
+            aria-label="生成并播放"
+            title="生成并播放"
             @click="runRender"
           >
-            生成并播放
+            <span class="i-streamline-ai-generate-music-spark h-4 w-4" aria-hidden="true" />
           </button>
-          <StatusBadge class="w-full sm:w-auto" :status="status" :text="statusText" />
+        </div>
+        <div class="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            class="h-9 w-9 inline-flex cursor-pointer appearance-none items-center justify-center rounded-lg border-none bg-zinc-800 text-zinc-200 transition hover:bg-zinc-700"
+            aria-label="我的作品"
+            title="我的作品"
+            @click="openLibrary"
+          >
+            <span class="i-lucide-folder h-4 w-4" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            class="h-9 w-9 inline-flex cursor-pointer appearance-none items-center justify-center rounded-lg border-none bg-zinc-800 text-zinc-200 transition disabled:cursor-not-allowed hover:bg-zinc-700 disabled:opacity-60"
+            :disabled="isRendering"
+            aria-label="分享"
+            title="分享"
+            @click="onShare"
+          >
+            <span class="i-lucide-share-2 h-4 w-4" aria-hidden="true" />
+          </button>
         </div>
       </div>
-      <p
-        v-if="errorText"
-        class="mb-3 border border-rose-500/40 rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-200 lg:hidden"
-      >
-        {{ errorText }}
-      </p>
       <div
         ref="editorEl"
         class="min-h-0 flex-1 overflow-hidden border border-zinc-800 rounded-xl lg:h-[65vh] lg:min-h-[420px] lg:flex-none"
       />
     </div>
 
-    <aside class="hidden border border-zinc-800 rounded-2xl bg-zinc-900/70 p-3 space-y-4 lg:block sm:p-4">
+    <aside class="hidden border border-zinc-800 rounded-2xl bg-zinc-900/70 p-3 lg:block space-y-4 sm:p-4">
       <h2 class="text-lg font-semibold">
         渲染面板
       </h2>
-      <label class="block text-sm text-zinc-300">
-        乐器
-        <select
-          v-model="selectedInstrument"
-          class="mt-1 w-full border border-zinc-700 rounded-lg bg-zinc-800 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-emerald-400"
-        >
-          <option v-for="instrument in instruments" :key="instrument" :value="instrument">
-            {{ instrument }}
-          </option>
-        </select>
-      </label>
-      <div
-        class="border border-zinc-800 rounded-lg bg-zinc-950 p-3 text-sm text-zinc-300 space-y-1"
-      >
-        <p>时长: {{ displayDurationSeconds.toFixed(2) }}s</p>
-        <p>大小: {{ Math.round(wavSize / 1024) }} KB</p>
-        <p>耗时: {{ renderMs }} ms</p>
-      </div>
       <AudioPlayerCard :title="songTitle" />
-      <p
-        v-if="errorText"
-        class="border border-rose-500/40 rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-200"
-      >
-        {{ errorText }}
-      </p>
     </aside>
 
     <BottomPeekDrawer v-model="playerDrawerOpen">
       <AudioPlayerCard :title="songTitle" />
     </BottomPeekDrawer>
+
+    <SideDrawer v-model="libraryOpen" title="我的作品">
+      <div class="flex flex-col gap-2 px-1">
+        <p v-if="!compositions.length" class="px-2 py-3 text-sm text-zinc-400">
+          暂无本地保存的作品
+        </p>
+        <button
+          v-for="item in compositions"
+          :key="item.id"
+          type="button"
+          class="group flex flex-col cursor-pointer appearance-none gap-1 rounded-lg border-none bg-zinc-800 px-3 py-2 text-left transition hover:bg-zinc-700"
+          @click.stop="loadComposition(item.id)"
+        >
+          <div class="flex items-start justify-between gap-2">
+            <span class="line-clamp-1 text-sm text-zinc-100 font-medium">{{ item.name }}</span>
+            <span
+              role="button"
+              tabindex="0"
+              class="inline-flex shrink-0 cursor-pointer items-center justify-center rounded-md p-1 text-zinc-500 transition hover:bg-zinc-900 hover:text-rose-300"
+              :aria-label="`删除 ${item.name}`"
+              @click.stop="removeComposition(item.id)"
+              @keydown.enter.stop.prevent="removeComposition(item.id)"
+              @keydown.space.stop.prevent="removeComposition(item.id)"
+            >
+              <span class="i-lucide-trash-2 h-4 w-4" aria-hidden="true" />
+            </span>
+          </div>
+          <span class="text-[11px] text-zinc-500">
+            {{ formatDate(item.updatedAt) }}
+          </span>
+        </button>
+      </div>
+    </SideDrawer>
   </section>
 </template>
 
 <script setup lang="ts">
+import type { Composition } from '../lib/compositionDb'
 import AudioPlayerCard from '../components/AudioPlayerCard.vue'
+import { useDialog } from '../composables/useDialog'
 import { useLargeScreen } from '../composables/useLargeScreen'
+import { useToast } from '../composables/useToast'
 import { createYydsEditor } from '../editor/monaco'
+import {
+  deleteComposition,
+  listCompositions,
+  saveComposition
+} from '../lib/compositionDb'
 import { useSharedAudio } from '../lib/sharedAudio'
+import {
+  buildShareUrl,
+  copyTextToClipboard,
+  decodeShare,
+  SHARE_PARAM
+} from '../lib/shareLink'
 import { toPublicUrl } from '../lib/toPublicUrl'
 import { initWasm, renderWav } from '../lib/wasmClient'
 
@@ -118,6 +135,27 @@ const instruments = ['piano', 'guitar', 'drums', 'dizi'] as const
 type Instrument = (typeof instruments)[number]
 const EXAMPLE_STORAGE_KEY = 'yyds.studio.selectedExample'
 const INSTRUMENT_STORAGE_KEY = 'yyds.studio.selectedInstrument'
+const DEFAULT_SONG_TITLE = 'YYDS Render'
+const COMPOSITION_PREFIX = 'composition:'
+
+type TrackValue
+  = | { kind: 'composition', id: string }
+    | { kind: 'example', file: string }
+
+function makeCompositionValue(id: string): string {
+  return `${COMPOSITION_PREFIX}${id}`
+}
+
+function parseTrackValue(value: string): TrackValue | null {
+  if (!value) {
+    return null
+  }
+  if (value.startsWith(COMPOSITION_PREFIX)) {
+    return { kind: 'composition', id: value.slice(COMPOSITION_PREFIX.length) }
+  }
+  return { kind: 'example', file: value }
+}
+
 interface ExampleItem {
   file: string
   title: string
@@ -129,27 +167,38 @@ const examplesLoading = ref(true)
 const exampleLoading = ref(false)
 const selectedExample = ref('')
 const selectedInstrument = ref<(typeof instruments)[number]>('piano')
-const songTitle = ref('YYDS Render')
-const status = ref<'idle' | 'loading' | 'success' | 'error'>('loading')
-const statusText = ref('正在初始化 WASM...')
-const errorText = ref('')
+const songTitle = ref('')
+const status = ref<'idle' | 'loading' | 'success' | 'error'>('idle')
 const playerDrawerOpen = ref(false)
-const renderMs = ref(0)
-const durationSeconds = ref(0)
-const wavSize = ref(0)
 const isRendering = computed(() => status.value === 'loading')
-const isExampleSelectLoading = computed(() => examplesLoading.value || exampleLoading.value)
+
+const compositions = ref<Composition[]>([])
+const currentCompositionId = ref<string | null>(null)
+const currentName = ref('')
+const libraryOpen = ref(false)
 
 let editorHandle: Awaited<ReturnType<typeof createYydsEditor>> | null = null
 const sharedAudio = useSharedAudio()
 const { isLargeScreen } = useLargeScreen()
+const dialog = useDialog()
+const toast = useToast()
 
-const displayDurationSeconds = computed(() => {
-  if (sharedAudio.duration.value > 0) {
-    return sharedAudio.duration.value
-  }
-  return durationSeconds.value
-})
+const exampleOptions = computed(() =>
+  examples.value.map(item => ({ value: item.file, label: item.title }))
+)
+const compositionOptions = computed(() =>
+  compositions.value.map(item => ({
+    value: makeCompositionValue(item.id),
+    label: item.name
+  }))
+)
+const trackOptions = computed(() => [
+  ...compositionOptions.value,
+  ...exampleOptions.value
+])
+const instrumentOptions = computed(() =>
+  instruments.map(item => ({ value: item, label: item }))
+)
 
 watch(isLargeScreen, (large) => {
   if (large) {
@@ -197,12 +246,8 @@ function clearAudio(): void {
   sharedAudio.stop()
 }
 
-function toErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error)
-}
-
 function parseSongTitle(source: string): string {
-  return source.match(/^\s*song\s+"([^"]+)"/m)?.[1] ?? 'YYDS Render'
+  return source.match(/^\s*song\s+"([^"]+)"/m)?.[1] ?? DEFAULT_SONG_TITLE
 }
 
 function inferInstrumentFromSource(text: string): Instrument | null {
@@ -235,26 +280,29 @@ function stripTrackInstrumentHints(input: string): string {
   return input.replace(/\btrack\s*\[[^\]\r\n]+\]\s*/g, 'track ')
 }
 
-async function bootstrap(): Promise<void> {
-  status.value = 'loading'
-  statusText.value = '正在初始化 WASM...'
-  errorText.value = ''
+function formatDate(timestamp: number): string {
   try {
-    await initWasm()
-    status.value = 'idle'
-    statusText.value = '就绪'
+    return new Date(timestamp).toLocaleString()
   }
-  catch (error) {
-    status.value = 'error'
-    statusText.value = '初始化失败'
-    errorText.value = toErrorMessage(error)
+  catch {
+    return ''
   }
 }
 
-async function loadExamples(
-  preferredExample = '',
-  preferredInstrument: Instrument | null = null
-): Promise<void> {
+async function bootstrap(): Promise<void> {
+  status.value = 'loading'
+  try {
+    await initWasm()
+    status.value = 'idle'
+  }
+  catch (error) {
+    status.value = 'error'
+    console.error('[studio] WASM 初始化失败', error)
+    toast.error('YYDS 引擎初始化失败，请刷新重试')
+  }
+}
+
+async function fetchExamplesManifest(): Promise<void> {
   examplesLoading.value = true
   try {
     const response = await fetch(toPublicUrl('/examples/manifest.json'))
@@ -262,23 +310,31 @@ async function loadExamples(
       throw new Error('示例曲目清单加载失败')
     }
     examples.value = (await response.json()) as ExampleItem[]
-    const restoredExample = preferredExample && examples.value.some(item => item.file === preferredExample)
-      ? preferredExample
-      : ''
-    const defaultExample
-      = restoredExample
-        || examples.value.find(item => item.file === 'doubletiger.yyds')?.file
-        || examples.value[0]?.file
-        || ''
-    if (defaultExample) {
-      await loadExample(defaultExample, preferredInstrument)
-    }
   }
   catch (error) {
-    errorText.value = toErrorMessage(error)
+    console.error('[studio] 示例加载失败', error)
+    toast.error('示例曲目加载失败，请检查网络')
   }
   finally {
     examplesLoading.value = false
+  }
+}
+
+async function loadExamples(
+  preferredExample = '',
+  preferredInstrument: Instrument | null = null
+): Promise<void> {
+  await fetchExamplesManifest()
+  const restoredExample = preferredExample && examples.value.some(item => item.file === preferredExample)
+    ? preferredExample
+    : ''
+  const defaultExample
+    = restoredExample
+      || examples.value.find(item => item.file === 'doubletiger.yyds')?.file
+      || examples.value[0]?.file
+      || ''
+  if (defaultExample) {
+    await loadExample(defaultExample, preferredInstrument)
   }
 }
 
@@ -288,8 +344,6 @@ async function loadExample(file: string, preferredInstrument: Instrument | null 
   }
   exampleLoading.value = true
   status.value = 'loading'
-  statusText.value = '加载并格式化曲目...'
-  errorText.value = ''
   clearAudio()
   try {
     const response = await fetch(toPublicUrl(`/examples/${file}`))
@@ -300,6 +354,8 @@ async function loadExample(file: string, preferredInstrument: Instrument | null 
     editorHandle.setValue(nextSource)
     const formattedSource = await editorHandle.formatDocument()
     songTitle.value = parseSongTitle(formattedSource)
+    currentName.value = songTitle.value
+    currentCompositionId.value = null
     const inferredInstrument = inferInstrumentFromSource(formattedSource)
     if (preferredInstrument) {
       selectedInstrument.value = preferredInstrument
@@ -310,41 +366,195 @@ async function loadExample(file: string, preferredInstrument: Instrument | null 
     selectedExample.value = file
     persistSelection()
     status.value = 'success'
-    statusText.value = '曲目已加载并格式化'
   }
   catch (error) {
     status.value = 'error'
-    statusText.value = '曲目加载失败'
-    errorText.value = toErrorMessage(error)
+    console.error('[studio] 曲目加载失败', error)
+    toast.error('曲目加载失败')
   }
   finally {
     exampleLoading.value = false
   }
 }
 
-function onExampleChange(event: Event): void {
-  const nextFile = (event.target as HTMLSelectElement).value
-  void loadExample(nextFile)
+function applySource(name: string, source: string, options: { compositionId?: string | null } = {}): void {
+  if (!editorHandle) {
+    return
+  }
+  clearAudio()
+  editorHandle.setValue(source)
+  const inferred = inferInstrumentFromSource(source)
+  if (inferred) {
+    selectedInstrument.value = inferred
+  }
+  songTitle.value = parseSongTitle(source) || name || DEFAULT_SONG_TITLE
+  currentName.value = name || songTitle.value
+  currentCompositionId.value = options.compositionId ?? null
+  selectedExample.value = ''
 }
 
-async function runFormat(): Promise<void> {
-  if (isRendering.value || !editorHandle) {
+function onTrackSelect(value: string): void {
+  const parsed = parseTrackValue(value)
+  if (!parsed) {
+    return
+  }
+  if (parsed.kind === 'composition') {
+    void loadComposition(parsed.id)
+    return
+  }
+  void loadExample(parsed.file)
+}
+
+async function refreshCompositions(): Promise<void> {
+  try {
+    compositions.value = await listCompositions()
+  }
+  catch (error) {
+    console.error('[studio] 作品列表加载失败', error)
+    toast.error('作品列表加载失败')
+  }
+}
+
+function openLibrary(): void {
+  void refreshCompositions()
+  libraryOpen.value = true
+}
+
+async function loadComposition(id: string): Promise<void> {
+  const target = compositions.value.find(item => item.id === id)
+  if (!target || !editorHandle) {
+    return
+  }
+  applySource(target.name, target.source, { compositionId: target.id })
+  selectedExample.value = makeCompositionValue(target.id)
+  libraryOpen.value = false
+  status.value = 'success'
+}
+
+async function removeComposition(id: string): Promise<void> {
+  const target = compositions.value.find(item => item.id === id)
+  if (!target) {
+    return
+  }
+  const confirmed = await dialog.confirm({
+    title: '删除作品',
+    message: `确定删除「${target.name}」？此操作不可恢复。`,
+    confirmText: '删除',
+    tone: 'danger'
+  })
+  if (!confirmed) {
+    return
+  }
+  try {
+    await deleteComposition(id)
+    const wasCurrent = currentCompositionId.value === id
+    if (wasCurrent) {
+      currentCompositionId.value = null
+      selectedExample.value = ''
+    }
+    await refreshCompositions()
+    if (wasCurrent) {
+      const fallback = trackOptions.value[0]?.value
+      if (fallback) {
+        onTrackSelect(fallback)
+      }
+    }
+  }
+  catch (error) {
+    console.error('[studio] 作品删除失败', error)
+    toast.error('作品删除失败')
+  }
+}
+
+async function onSave(): Promise<void> {
+  if (!editorHandle || isRendering.value) {
     return
   }
   status.value = 'loading'
-  statusText.value = '格式化中...'
-  errorText.value = ''
   try {
-    await editorHandle.formatDocument()
-    songTitle.value = parseSongTitle(editorHandle.getValue())
+    const formatted = await editorHandle.formatDocument()
+    const parsedTitle = parseSongTitle(formatted)
+    const fallbackName = currentName.value || parsedTitle || '未命名作品'
+    let name = fallbackName
+    if (!currentCompositionId.value) {
+      const promptResult = await dialog.prompt({
+        title: '保存作品',
+        message: '为该作品命名，后续保存将自动覆盖。',
+        defaultValue: fallbackName,
+        placeholder: '输入作品名称',
+        confirmText: '保存'
+      })
+      if (promptResult === null) {
+        status.value = 'idle'
+        return
+      }
+      name = promptResult.trim() || fallbackName
+    }
+    const saved = await saveComposition({
+      id: currentCompositionId.value ?? undefined,
+      name,
+      source: formatted
+    })
+    currentCompositionId.value = saved.id
+    currentName.value = saved.name
+    songTitle.value = saved.name
+    selectedExample.value = makeCompositionValue(saved.id)
+    await refreshCompositions()
     status.value = 'success'
-    statusText.value = '格式化完成'
   }
   catch (error) {
     status.value = 'error'
-    statusText.value = '格式化失败'
-    errorText.value = toErrorMessage(error)
+    console.error('[studio] 保存失败', error)
+    toast.error('作品保存失败')
   }
+}
+
+async function onShare(): Promise<void> {
+  if (!editorHandle) {
+    return
+  }
+  const source = editorHandle.getValue()
+  const name = currentName.value || parseSongTitle(source) || DEFAULT_SONG_TITLE
+  try {
+    const url = buildShareUrl({ name, source })
+    await copyTextToClipboard(url)
+    status.value = 'success'
+  }
+  catch (error) {
+    status.value = 'error'
+    console.error('[studio] 分享链接生成失败', error)
+    toast.error('分享链接生成失败')
+  }
+}
+
+async function tryLoadFromShareLink(): Promise<boolean> {
+  if (typeof window === 'undefined' || !editorHandle) {
+    return false
+  }
+  const params = new URLSearchParams(window.location.search)
+  const raw = params.get(SHARE_PARAM)
+  if (!raw) {
+    return false
+  }
+  const payload = decodeShare(raw)
+  // Always strip the share param to avoid re-triggering on refresh.
+  params.delete(SHARE_PARAM)
+  const nextSearch = params.toString()
+  const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}${window.location.hash}`
+  window.history.replaceState(null, '', nextUrl)
+  if (!payload) {
+    return false
+  }
+  applySource(payload.name, payload.source)
+  try {
+    const formatted = await editorHandle.formatDocument()
+    songTitle.value = parseSongTitle(formatted) || payload.name || DEFAULT_SONG_TITLE
+  }
+  catch {
+    // formatting failure is non-fatal
+  }
+  status.value = 'success'
+  return true
 }
 
 async function runRender(): Promise<void> {
@@ -352,30 +562,32 @@ async function runRender(): Promise<void> {
     return
   }
   status.value = 'loading'
-  statusText.value = '正在生成并播放...'
-  errorText.value = ''
   clearAudio()
   try {
-    const startedAt = performance.now()
     const currentSource = editorHandle.getValue()
     songTitle.value = parseSongTitle(currentSource)
     const sourceToRender = stripTrackInstrumentHints(currentSource)
     const result = await renderWav(sourceToRender, selectedInstrument.value)
-    renderMs.value = Math.round(performance.now() - startedAt)
-    durationSeconds.value = result.durationSeconds
-    wavSize.value = result.size
     const wavBlob = new Blob([result.bytes], { type: 'audio/wav' })
-    const { played } = await sharedAudio.load(wavBlob, { autoPlay: true, title: songTitle.value })
+    await sharedAudio.load(wavBlob, { autoPlay: true, title: songTitle.value })
     status.value = 'success'
-    statusText.value = played ? '渲染成功，正在播放' : '渲染成功，点击播放'
     playerDrawerOpen.value = true
   }
   catch (error) {
     status.value = 'error'
-    statusText.value = '渲染失败'
-    errorText.value = toErrorMessage(error)
+    console.error('[studio] 渲染失败', error)
+    toast.error('渲染失败，请检查代码后重试')
     clearAudio()
   }
+}
+
+function handleSaveShortcut(event: KeyboardEvent): void {
+  const isSaveKey = (event.metaKey || event.ctrlKey) && (event.key === 's' || event.key === 'S')
+  if (!isSaveKey) {
+    return
+  }
+  event.preventDefault()
+  void onSave()
 }
 
 onMounted(async () => {
@@ -387,7 +599,17 @@ onMounted(async () => {
     editorHandle = await createYydsEditor(editorEl.value, () => {})
   }
   await bootstrap()
-  await loadExamples(persisted.example, persisted.instrument)
+  const loadedFromShare = await tryLoadFromShareLink()
+  if (loadedFromShare) {
+    void fetchExamplesManifest()
+  }
+  else {
+    await loadExamples(persisted.example, persisted.instrument)
+  }
+  void refreshCompositions()
+  if (typeof window !== 'undefined') {
+    window.addEventListener('keydown', handleSaveShortcut)
+  }
 })
 
 watch(selectedInstrument, () => {
@@ -397,5 +619,8 @@ watch(selectedInstrument, () => {
 onBeforeUnmount(() => {
   editorHandle?.dispose()
   clearAudio()
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('keydown', handleSaveShortcut)
+  }
 })
 </script>
